@@ -1,0 +1,26 @@
+{
+  "name": "youpod",
+  "version": "1.0.0",
+  "description": "",
+  "main": "youpod.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bigaston/youpod.git"
+  },
+  "keywords": [
+    "youtube",
+    "podcast"
+  ],
+  "author": "Bigaston",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Bigaston/youpod/issues"
+  },
+  "homepage": "https://github.com/Bigaston/youpod#readme",
+  "dependencies": {
+    "html-convert": "^2.1.7"
+  }
+}
