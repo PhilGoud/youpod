@@ -3,7 +3,7 @@
     <head>
         <style>
             @import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
-            #image {
+            img {
                 position: absolute;
                 left: 90px;
                 top: 100px;
@@ -50,10 +50,10 @@
     </head>
     <body>
         <div id="targetDiv">
-            <img id="image" src="https://script.lepodcast.fr/cover" />
-            <h1 class="text">Manette de Proust #15 : Super Mario World</h1>
-            <h2 class="text">Manette de Proust</h2>
-            <p class="text">On a tous un jeu qui nous fait retourner en enfance.</p>
+            <img src="{{ imageURL }}" />
+            <h1 class="text">{{ epTitle }}</h1>
+            <h2 class="text">{{ podTitle }}</h2>
+            <p class="text">{{ podSub }}</p>
         </div>
     </body>
 </html>
