@@ -2,23 +2,25 @@ const htmlConvert = require('html-convert');
 const fs = require('fs');
 const path = require("path");
 const mustache = require("mustache");
-const str = require('string-to-stream')
+const Parser = require("rss-parser");
  
 var convert = htmlConvert();
+var parser = new Parser();
 
 var template = fs.readFileSync(path.join(__dirname, "/template/default.mustache"), "utf8");
 
-var renderObj = {
-  "imageURL": "https://manette-de-proust.lepodcast.fr/cover",
-  "epTitle": "Manette de Proust #15 : Super Mario World",
-  "podTitle": "Manette de Proust",
-  "podSub": "On a tous un jeu qui nous fait retourner en enfance."
-}
+parser.parseURL("https://point-games.lepodcast.fr/rss", (err, feed) => {
+  var renderObj = {
+    "imageURL": feed.image.url,
+    "epTitle": feed.items[0].title,
+    "podTitle": feed.title,
+    "podSub": feed.itunes.subtitle
+  }
 
-var string = mustache.render(template, renderObj)
+  var string = mustache.render(template, renderObj)
+  fs.writeFileSync(path.join(__dirname, "tmp", "page.html"), string);
 
-str(string)
-  .pipe(convert())
-  .pipe(fs.createWriteStream('out.png'))
-
-  console.log("Fichier exporté!")
+  fs.createReadStream(path.join(__dirname, "tmp", "page.html"))
+    .pipe(convert())
+    .pipe(fs.createWriteStream(path.join(__dirname, "tmp", "out.png")))
+})

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
         <style>
             @import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
             img {
@@ -50,10 +51,10 @@
     </head>
     <body>
         <div id="targetDiv">
-            <img src="{{ imageURL }}" />
-            <h1 class="text">{{ epTitle }}</h1>
-            <h2 class="text">{{ podTitle }}</h2>
-            <p class="text">{{ podSub }}</p>
+            <img src="{{{ imageURL }}}" />
+            <h1 class="text">{{{ epTitle }}}</h1>
+            <h2 class="text">{{{ podTitle }}}</h2>
+            <p class="text">{{{ podSub }}}</p>
         </div>
     </body>
 </html>
