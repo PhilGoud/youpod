@@ -16,8 +16,8 @@
             <p>Il y a actuellement {{ waiting_list }} vidéos dans la liste d'attente. Une fois la vidéo générée, vous receverez un email contenant le lien pour la télécharger. Vous aurez alors <strong>24H</strong> pour la télécharger.</p>
             <form action="/addvideo" method="POST">
                 <div class="form-group">
-                    <label for="url">L'URL de votre flux RSS</label>
-                    <input type="url" class="form-control" id="url" name="url" placeholder="http://example.com/rss" required>
+                    <label for="rss">L'URL de votre flux RSS</label>
+                    <input type="url" class="form-control" id="rss" name="rss" placeholder="http://example.com/rss" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Votre adresse email</label>

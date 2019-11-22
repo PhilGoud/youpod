@@ -26,6 +26,8 @@
     "express": "^4.17.1",
     "html-convert": "^2.1.7",
     "mustache": "^3.1.0",
-    "rss-parser": "^3.7.3"
+    "rand-token": "^0.4.0",
+    "rss-parser": "^3.7.3",
+    "sqlite3": "^4.1.0"
   }
 }
