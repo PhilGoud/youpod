@@ -47,7 +47,8 @@ app.get("/", (req, res) => {
     template = fs.readFileSync(path.join(__dirname, "/web/index.mustache"), "utf8")
 
     var render_object = {
-      "waiting_list": rows[0]["count(*)"]
+      "waiting_list": rows[0]["count(*)"],
+      "keeping_time": config.keeping_time
     }
   
     res.setHeader("content-type", "text/html");
@@ -102,17 +103,20 @@ function restartGeneration() {
 }
 
 function flush() {
-  db.each(`SELECT * FROM video WHERE status='finished'`, (err, row) => {
-    time = Date.now() - row.end_timestamp
-    time = time / (1000 * 60 * 60);
-
-    if (time > config.keeping_time) {
-      fs.unlinkSync(path.join(__dirname, "/video/", `output_${row.id}.mp4`))
-      db.run(`UPDATE video SET status='deleted' WHERE id=${row.id}`);
-      console.log("Flush video " + row.id)
-
+  db.all(`SELECT * FROM video WHERE status='finished'`, (err, rows) => {
+    if (rows.length >=1) {
+      for (i = 0; i < rows.length; i++) {
+        time = Date.now() - rows[i].end_timestamp
+        time = time / (1000 * 60 * 60);
+    
+        if (time > config.keeping_time) {
+          fs.unlinkSync(path.join(__dirname, "/video/", `output_${rows[i].id}.mp4`))
+          db.run(`UPDATE video SET status='deleted' WHERE id=${rows[i].id}`);
+          console.log("Flush video " + rows[i].id)
+    
+        }
+      }
     }
-
   })
 }
 
