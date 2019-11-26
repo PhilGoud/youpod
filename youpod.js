@@ -63,7 +63,7 @@ app.get("/download/:id", (req, res) => {
           res.status(403).send("Vous n'avez pas accès à cette vidéo")
         } else {
           if (rows[0].status == 'finished') {
-            res.download(path.join(__dirname, "/video/", `output_${rows[0].id}.mp4`))
+            res.download(path.join(__dirname, "/video/", `output_${rows[0].id}.mp4`), `youpod_${rows[0].end_timestamp}.mp4`)
           } else if (rows[0].status == 'deleted') {
             res.status(404).send("Cette vidéo à été supprimée du site!")
           } else if (rows[0].status == 'during') {
