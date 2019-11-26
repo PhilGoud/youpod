@@ -42,7 +42,7 @@ app.get("/static/:file", (req, res) => {
 })
 
 app.get("/", (req, res) => {
-  db.all(`SELECT count(*) FROM video WHERE status='waiting'`, (err, rows) => {
+  db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
     template = fs.readFileSync(path.join(__dirname, "/web/index.mustache"), "utf8")
 
     var render_object = {
