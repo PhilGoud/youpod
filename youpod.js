@@ -1,4 +1,3 @@
-const htmlConvert = require('html-convert');
 const fs = require('fs');
 const path = require("path");
 const mustache = require("mustache");
@@ -11,6 +10,7 @@ const bodyParser = require('body-parser');
 const randtoken = require('rand-token');
 const sq = require('sqlite3');
 const nodemailer = require("nodemailer");
+const puppeteer = require('puppeteer');
 
 var transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -35,7 +35,6 @@ flush();
 setInterval(flush, 1000 * 60 * 15);
 restartGeneration();
  
-var convert = htmlConvert();
 var parser = new Parser();
 
 app.get("/static/:file", (req, res) => {
@@ -100,6 +99,8 @@ function restartGeneration() {
   db.each(`SELECT * FROM video WHERE status='during'`, (err, row) => {
     generateFeed(row.rss, row.id)
   })
+
+  initNewGeneration();
 }
 
 function flush() {
@@ -148,18 +149,25 @@ function generateFeed(feed_url, id) {
       "podSub": feed.itunes.subtitle
     }
 
-    var string = mustache.render(template, renderObj)
-    fs.writeFileSync(path.join(__dirname, "tmp", `page_${id}.html`), string);
+    string = mustache.render(template, renderObj);
 
     console.log(id + " Génération de l'image");
-
-    stream = fs.createReadStream(path.join(__dirname, "tmp", `page_${id}.html`))
-      .pipe(convert())
-      .pipe(fs.createWriteStream(path.join(__dirname, "tmp", `overlay_${id}.png`)))
-      
-    stream.on("finish", () => {
+    
+    (async () => {
+      const browser = await puppeteer.launch({
+        defaultViewport: {
+          width: 1920,
+          height: 1080
+        }
+      });
+      const page = await browser.newPage();
+      await page.setContent(string);
+      await page.screenshot({path: path.join(__dirname, "/tmp/", `overlay_${id}.png`), omitBackground: true});
+    
+      await browser.close();
+      console.log(id + " Image générée!")
       downloadAudio(id)
-    });
+    })();
   })
 }
 
@@ -180,7 +188,6 @@ function generateVideo(id) {
       console.log(id + " Vidéo générée!")
       db.run(`UPDATE video SET status='finished', end_timestamp='${Date.now()}' WHERE id=${id}`);
       fs.unlinkSync(path.join(__dirname, "/tmp/", `overlay_${id}.png`))
-      fs.unlinkSync(path.join(__dirname, "/tmp/", `page_${id}.html`))
       fs.unlinkSync(path.join(__dirname, "/tmp/", `audio_${id}.mp3`))
 
       sendMail(id);
@@ -210,6 +217,8 @@ function sendMail(id) {
     transporter.sendMail(mailOptions, function (err, info) {
       if(err) return console.log(err)
     });
+
+    db.run(`UPDATE video SET email='deleted' WHERE id=${id}`);
   })
 }
 
