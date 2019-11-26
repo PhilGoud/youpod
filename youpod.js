@@ -158,7 +158,9 @@ function generateFeed(feed_url, id) {
         defaultViewport: {
           width: 1920,
           height: 1080
-        }
+        },
+        headless: true,
+        args: ['--no-sandbox']
       });
       const page = await browser.newPage();
       await page.setContent(string);
