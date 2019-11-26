@@ -136,7 +136,7 @@ function initNewGeneration() {
 
 function generateFeed(feed_url, id) {
   console.log(id + " Démarage de la création")
-  parser.parseURL("http://glebeskefe.lepodcast.fr/rss", (err, lFeed) => {
+  parser.parseURL(feed_url, (err, lFeed) => {
     console.log(id + " Récupération du flux")
     feed = lFeed
 
