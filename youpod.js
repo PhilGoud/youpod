@@ -3,7 +3,7 @@ const path = require("path");
 const mustache = require("mustache");
 const Parser = require("rss-parser");
 const download = require('download');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const express = require('express')
 const config = require("./config.json")
 const bodyParser = require('body-parser');
@@ -185,19 +185,25 @@ function downloadAudio(id) {
 function generateVideo(id) {
   console.log(id + " Démarage de la génération de la vidéo")
 
-  exec(`ffmpeg -y -i ./loop/loop.mp4 -i ./tmp/overlay_${id}.png -filter_complex "overlay=0:0" -i ./tmp/audio_${id}.mp3 -shortest -acodec copy ./video/output_${id}.mp4`, {cmd: __dirname}, (err, stdout, stderr) => {
-    if(err == undefined) {
-      console.log(id + " Vidéo générée!")
-      db.run(`UPDATE video SET status='finished', end_timestamp='${Date.now()}' WHERE id=${id}`);
-      fs.unlinkSync(path.join(__dirname, "/tmp/", `overlay_${id}.png`))
-      fs.unlinkSync(path.join(__dirname, "/tmp/", `audio_${id}.mp3`))
+  var child = spawn("ffmpeg", ["-y", "-i", "./loop/loop.mp4", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "copy", `./video/output_${id}.mp4`]);
 
-      sendMail(id);
-      initNewGeneration();
-    } else {
-      console.log(err)
-    }
-  })
+  child.stdout.on('data', function (data) {
+    console.log('stdout: ' + data);
+  });
+
+  child.stderr.on('data', function (data) {
+    console.log('stderr: ' + data);
+  });
+
+  child.on('close', function (code) {
+    console.log(id + " Vidéo générée!")
+    db.run(`UPDATE video SET status='finished', end_timestamp='${Date.now()}' WHERE id=${id}`);
+    fs.unlinkSync(path.join(__dirname, "/tmp/", `overlay_${id}.png`))
+    fs.unlinkSync(path.join(__dirname, "/tmp/", `audio_${id}.mp3`))
+
+    sendMail(id);
+    initNewGeneration();
+  });
 }
 
 function sendMail(id) {
