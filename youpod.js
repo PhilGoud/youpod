@@ -55,6 +55,20 @@ app.get("/template/:name", (req, res) => {
   res.send(mustache.render(template, renderObj))
 })
 
+app.get("/custom", (req, res) => {
+  db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
+    template = fs.readFileSync(path.join(__dirname, "/web/custom.mustache"), "utf8")
+
+    var render_object = {
+      "waiting_list": rows[0]["count(*)"],
+      "keeping_time": config.keeping_time
+    }
+  
+    res.setHeader("content-type", "text/html");
+    res.send(mustache.render(template, render_object))
+  })
+})
+
 app.get("/", (req, res) => {
   db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
     template = fs.readFileSync(path.join(__dirname, "/web/index.mustache"), "utf8")
@@ -107,11 +121,27 @@ app.post("/addvideo", (req, res) => {
 
 })
 
+app.post("/addvideocustom", (req, res) => {
+  if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.podSub != undefined && req.body.audioURL != undefined) {
+    db.run(`INSERT INTO video(email, rss, template, access_token, epTitle, epImg, podTitle, podSub, audioURL) VALUES ("${req.body.email}", "__custom__", ?, "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.template, req.body.epTitle, req.body.imgURL, req.body.podTitle, req.body.podSub, req.body.audioURL])    
+    
+    initNewGeneration();
+    res.send("Vidéo correctement ajoutée à la liste!")
+  } else {
+    res.status(400).send("Votre requète n'est pas complète...")
+  }
+
+})
+
 // FONCTION DE GENERATIONS
 function restartGeneration() {
   console.log("Reprise de générations...")
   db.each(`SELECT * FROM video WHERE status='during'`, (err, row) => {
-    generateFeed(row.rss, row.guid, row.template, row.id)
+    if (row.rss != "__custom__") {
+      generateFeed(row.rss, row.guid, row.template, row.id)
+    } else {
+      generateImgCustom(row.id);
+    }
   })
 
   initNewGeneration();
@@ -141,10 +171,56 @@ function initNewGeneration() {
       db.all(`SELECT * FROM video WHERE status='waiting'`, (err, rows) => {
         if(rows.length >= 1) {
           db.run(`UPDATE video SET status='during' WHERE id=${rows[0].id}`);
-          generateFeed(rows[0].rss, rows[0].guid, rows[0].template, rows[0].id)
+          if (rows[0].rss != "__custom__") {
+            generateFeed(rows[0].rss, rows[0].guid, rows[0].template, rows[0].id)
+          } else {
+            generateImgCustom(rows[0].id);
+          }
         }
       })
     }
+  })
+}
+
+function generateImgCustom(id) {
+  console.log(id + " Démarage de la création");
+
+  db.each(`SELECT * FROM video WHERE id=${id}`, (err, row) => {
+    if (row.template != "") {
+      template = row.template
+    } else {
+      var template = fs.readFileSync(path.join(__dirname, "/template/default.mustache"), "utf8");
+    }
+
+    var renderObj = {
+      "imageURL": row.epImg,
+      "epTitle": row.epTitle,
+      "podTitle": row.podTitle,
+      "podSub": row.podSub
+    }
+
+    string = mustache.render(template, renderObj);
+
+    console.log(id + " Génération de l'image");
+    
+    (async () => {
+      const browser = await puppeteer.launch({
+        defaultViewport: {
+          width: 1920,
+          height: 1080
+        },
+        headless: true,
+        args: ['--no-sandbox']
+      });
+      const page = await browser.newPage();
+      await page.setContent(string);
+      await page.screenshot({path: path.join(__dirname, "/tmp/", `overlay_${id}.png`), omitBackground: true});
+    
+      await browser.close();
+      console.log(id + " Image générée!")
+
+      downloadAudioCustom(id, row.audioURL)
+    })();
   })
 }
 
@@ -207,6 +283,15 @@ function generateFeed(feed_url, guid, temp, id) {
   })
 }
 
+function downloadAudioCustom(id, audio_url) {
+  console.log(id + " Démarage du téléchargement")
+  download(audio_url).then(data => {
+    fs.writeFileSync(path.join(__dirname, `/tmp/audio_${id}.mp3`), data);
+    console.log(id + " Fichier téléchargé!");
+    generateVideo(id);
+  });
+}
+
 function downloadAudio(id) {
   console.log(id + " Démarage du téléchargement")
   download(feed.items[0].enclosure.url).then(data => {
@@ -242,12 +327,23 @@ function generateVideo(id) {
 
 function sendMail(id) {
   db.all(`SELECT * FROM video WHERE id='${id}'`, (err, rows) => {
-    template = fs.readFileSync(path.join(__dirname, "/web/mail.mustache"), "utf8")
-    renderObj = {
-      "rss_link": rows[0].rss,
-      "keeping_time": config.keeping_time,
-      "video_link": config.host + "/download/" + id + "?token=" + rows[0].access_token
+
+    if (rows[0].rss != "__custom__") {
+      template = fs.readFileSync(path.join(__dirname, "/web/mail.mustache"), "utf8")
+      renderObj = {
+        "rss_link": rows[0].rss,
+        "keeping_time": config.keeping_time,
+        "video_link": config.host + "/download/" + id + "?token=" + rows[0].access_token
+      }
+    } else {
+      template = fs.readFileSync(path.join(__dirname, "/web/mail_custom.mustache"), "utf8")
+      renderObj = {
+        "ep_title": rows[0].epTitle,
+        "keeping_time": config.keeping_time,
+        "video_link": config.host + "/download/" + id + "?token=" + rows[0].access_token
+      }
     }
+
 
     const mailOptions = {
       from: 'youpod@balado.tools', // sender address
