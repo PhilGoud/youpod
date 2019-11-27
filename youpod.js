@@ -83,8 +83,8 @@ app.get("/download/:id", (req, res) => {
 })
 
 app.post("/addvideo", (req, res) => {
-  if (req.body.email != undefined && req.body.rss != undefined) {
-    db.run(`INSERT INTO video(email, rss, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${randtoken.generate(32)}")`)
+  if (req.body.email != undefined && req.body.rss != undefined && req.body.selectEp != undefined) {
+    db.run(`INSERT INTO video(email, rss, guid, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", "${randtoken.generate(32)}")`)
     initNewGeneration();
     res.send("Vidéo correctement ajoutée à la liste!")
   } else {
@@ -97,7 +97,7 @@ app.post("/addvideo", (req, res) => {
 function restartGeneration() {
   console.log("Reprise de générations...")
   db.each(`SELECT * FROM video WHERE status='during'`, (err, row) => {
-    generateFeed(row.rss, row.id)
+    generateFeed(row.rss, row.guid, row.id)
   })
 
   initNewGeneration();
@@ -127,14 +127,14 @@ function initNewGeneration() {
       db.all(`SELECT * FROM video WHERE status='waiting'`, (err, rows) => {
         if(rows.length >= 1) {
           db.run(`UPDATE video SET status='during' WHERE id=${rows[0].id}`);
-          generateFeed(rows[0].rss, rows[0].id)
+          generateFeed(rows[0].rss, rows[0].guid, rows[0].id)
         }
       })
     }
   })
 }
 
-function generateFeed(feed_url, id) {
+function generateFeed(feed_url, guid, id) {
   console.log(id + " Démarage de la création")
   parser.parseURL(feed_url, (err, lFeed) => {
     console.log(id + " Récupération du flux")
@@ -142,9 +142,25 @@ function generateFeed(feed_url, id) {
 
     var template = fs.readFileSync(path.join(__dirname, "/template/default.mustache"), "utf8");
 
+    i = 0;
+    while(feed.items[i].guid != guid && i < feed.items.length) {
+      i++;
+    }
+
+    if (i == feed.items.length) {
+      db.run(`UPDATE video SET email='error' WHERE id=${id}`);
+      return;
+    }
+
+    if(feed.items[i].itunes.image == undefined) {
+      img = feed.image.link
+    } else {
+      img = feed.items[i].itunes.image
+    }
+
     var renderObj = {
-      "imageURL": feed.image.url,
-      "epTitle": feed.items[0].title,
+      "imageURL": img,
+      "epTitle": feed.items[i].title,
       "podTitle": feed.title,
       "podSub": feed.itunes.subtitle
     }
