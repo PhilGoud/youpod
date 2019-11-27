@@ -41,6 +41,20 @@ app.get("/static/:file", (req, res) => {
   res.sendFile(path.join(__dirname, "/web/static/", req.params.file))
 })
 
+app.get("/template/:name", (req, res) => {
+  template = fs.readFileSync(path.join(__dirname, "/template/" + req.params.name + ".mustache"), "utf8")
+
+  var renderObj = {
+    "imageURL": "https://glebeskefe.lepodcast.fr/cover",
+    "epTitle": "Ceci est un super titre d'épisode!",
+    "podTitle": "Super Podcast",
+    "podSub": "Parfois dans la vie on a des coups de haut et des coups de bas..."
+  }
+
+  res.setHeader("content-type", "text/html");
+  res.send(mustache.render(template, renderObj))
+})
+
 app.get("/", (req, res) => {
   db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
     template = fs.readFileSync(path.join(__dirname, "/web/index.mustache"), "utf8")
@@ -84,7 +98,7 @@ app.get("/download/:id", (req, res) => {
 
 app.post("/addvideo", (req, res) => {
   if (req.body.email != undefined && req.body.rss != undefined && req.body.selectEp != undefined) {
-    db.run(`INSERT INTO video(email, rss, guid, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", "${randtoken.generate(32)}")`)
+    db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
     initNewGeneration();
     res.send("Vidéo correctement ajoutée à la liste!")
   } else {
@@ -97,7 +111,7 @@ app.post("/addvideo", (req, res) => {
 function restartGeneration() {
   console.log("Reprise de générations...")
   db.each(`SELECT * FROM video WHERE status='during'`, (err, row) => {
-    generateFeed(row.rss, row.guid, row.id)
+    generateFeed(row.rss, row.guid, row.template, row.id)
   })
 
   initNewGeneration();
@@ -127,20 +141,24 @@ function initNewGeneration() {
       db.all(`SELECT * FROM video WHERE status='waiting'`, (err, rows) => {
         if(rows.length >= 1) {
           db.run(`UPDATE video SET status='during' WHERE id=${rows[0].id}`);
-          generateFeed(rows[0].rss, rows[0].guid, rows[0].id)
+          generateFeed(rows[0].rss, rows[0].guid, rows[0].template, rows[0].id)
         }
       })
     }
   })
 }
 
-function generateFeed(feed_url, guid, id) {
+function generateFeed(feed_url, guid, temp, id) {
   console.log(id + " Démarage de la création")
   parser.parseURL(feed_url, (err, lFeed) => {
     console.log(id + " Récupération du flux")
     feed = lFeed
 
-    var template = fs.readFileSync(path.join(__dirname, "/template/default.mustache"), "utf8");
+    if (temp != "") {
+      template = temp
+    } else {
+      var template = fs.readFileSync(path.join(__dirname, "/template/default.mustache"), "utf8");
+    }
 
     i = 0;
     while(feed.items[i].guid != guid && i < feed.items.length) {

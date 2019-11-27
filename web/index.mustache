@@ -32,6 +32,12 @@
                     <input type="email" class="form-control" id="email" name="email" placeholder="hello@example.com" required>
                 </div>
 
+                <div class="form-group">
+                    <label for="template">Votre template</label>
+                    <textarea class="form-control" id="template" name="template" rows="5"></textarea>
+                    <small id="templateHelp" class="form-text text-muted">Collez ici votre template Mustache pour créer l'image. Les balises qui seront remplacés sont <b>imageURL</b> (lien vers image de l'épisode), <b>epTitle</b> (titre de l'épisode), <b>podTitle</b> (titre du podcast) et <b>podSub</b> (le sous titre du podcast)</small>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Envoyer</button>
             </form>
             <br>

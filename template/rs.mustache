@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            @import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
+            #podImg {
+                position: absolute;
+                left: 90px;
+                top: 100px;
+                width: 655px;
+                height: 655px;
+            }
+
+            h1 {
+                position: absolute;
+                left: 785px;
+                top: 200px;
+                width: 1115px;
+                font-size: 64px;
+            }
+
+            h2 {
+                position:absolute;
+                left: 785px;
+                top: 440px;
+                width: 1115px;
+                font-size: 64px;
+            }
+            
+            #podSub {
+                position:absolute;
+                left: 785px;
+                top: 515px;
+                width: 1115px;
+                font-size: 48px;
+            }
+
+            .text{
+                word-wrap: normal;
+                color: white;
+                text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.50);
+            }
+            
+            .logo {
+                position: absolute;
+                width: 50px;
+                height: 50px;
+                top: 700px;
+            }
+
+            .logoText {
+                position: absolute;
+                font-size: 35px;
+                top: 670px;
+            }
+
+            div {
+                height: 1080px;
+                width: 1920px;
+                font-family: 'Montserrat', sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="targetDiv">
+            <img id="podImg" src="{{{ imageURL }}}" />
+            <h1 class="text">{{{ epTitle }}}</h1>
+            <h2 class="text">{{{ podTitle }}}</h2>
+            <p id="podSub" class="text">{{{ podSub }}}</p>
+            
+            <img class="logo" style="left: 785px;" src="http://localhost:5674/static/twitter.png">
+            <p class="logoText text" style="left: 840px;">/Bigaston<p>
+            <img class="logo" style="left: 1020px;" src="http://localhost:5674/static/twitch.png">
+            <p class="logoText text" style="left: 1075px;">/Bigast0n<p>
+            <img class="logo" style="left: 1250px;" src="http://localhost:5674/static/utip.png">
+            <p class="logoText text" style="left: 1305px;">/Bigaston<p>
+            <img class="logo" style="left: 1490px;" src="http://localhost:5674/static/patreon.png">
+            <p class="logoText text" style="left: 1545px;">/Bigaston<p>
+        </div>
+    </body>
+</html>
