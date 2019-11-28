@@ -278,7 +278,7 @@ function generateFeed(feed_url, guid, temp, id) {
     
       await browser.close();
       console.log(id + " Image générée!")
-      downloadAudio(id)
+      downloadAudio(id, feed.items[i].enclosure.url)
     })();
   })
 }
@@ -292,9 +292,9 @@ function downloadAudioCustom(id, audio_url) {
   });
 }
 
-function downloadAudio(id) {
+function downloadAudio(id, audio_url) {
   console.log(id + " Démarage du téléchargement")
-  download(feed.items[0].enclosure.url).then(data => {
+  download(audio_url).then(data => {
     fs.writeFileSync(path.join(__dirname, `/tmp/audio_${id}.mp3`), data);
     console.log(id + " Fichier téléchargé!");
     generateVideo(id);
