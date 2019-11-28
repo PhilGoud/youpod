@@ -307,11 +307,11 @@ function generateVideo(id) {
   var child = spawn("ffmpeg", ["-y", "-i", "./loop/loop.mp4", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "copy", `./video/output_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
-    console.log('stdout: ' + data);
+    console.log(id + ' stdout: ' + data);
   });
 
   child.stderr.on('data', function (data) {
-    console.log('stderr: ' + data);
+    console.log(id + ' stderr: ' + data);
   });
 
   child.on('close', function (code) {
