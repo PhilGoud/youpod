@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Youpod</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link href="./static/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <h1>Youpod</h1>
+            <p>Générez votre vidéo pour les réseaux sociaux!</p>
+        </header>
+
+        <section>
+            <h2>Bienvenue sur Youpod</h2>
+            <p>Il y a actuellement <strong>{{ waiting_list }}</strong> vidéo(s) dans la liste d'attente. Une fois la vidéo générée, vous receverez un email contenant le lien pour la télécharger. Vous aurez alors <strong>{{ keeping_time }}H</strong> pour la télécharger.</p>
+            
+            <form action="/addvideopreview" method="POST">
+                <div class="form-group">
+                    <label for="imgURL">L'URL de votre image</label>
+                    <input type="url" class="form-control" id="imgURL" name="imgURL" placeholder="http://example.com/rss" required>
+                </div>
+                <div class="form-group">
+                    <label for="epTitle">Le titre de l'épisode</label>
+                    <input type="text" class="form-control" id="epTitle" name="epTitle" placeholder="Super Titre D'épisode" required>
+                </div>
+                <div class="form-group">
+                    <label for="podTitle">Le nom du podcast</label>
+                    <input type="text" class="form-control" id="podTitle" name="podTitle" placeholder="Super Titre de Podcast" required>
+                </div>
+                <div class="form-group">
+                    <label for="audioURL">Votre fichier audio</label>
+                    <input type="url" class="form-control" id="audioURL" name="audioURL" placeholder="http://example.com/audio.mp3" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="timestart">Début de la préview</label>
+                    <input type="text" class="form-control" id="timestart" name="timestart" placeholder="00:00" maxlenght="6" required>
+                    <small id="timestartHelp" class="form-text text-muted">La vidéo durera 20s à partir de ce moment là. Entrez au format minutes:secondes</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Votre adresse email</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="hello@example.com" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+            </form>
+            <br>
+            <p>Cet outil utilise le tutoriel venant <a href="https://alliesnumeriques.org/tutoriels/publier-votre-podcast-sur-youtube-la-methode-classe-avec-ffmpeg/" target="_blank">d'Allier Numérique</a></p>
+            <p>Pour votre information, votre adresse email est conservée dans la base de donnée le temps de la génération, puis est automatiquement supprimée une fois le mail envoyé.<br>Votre flux RSS lui reste dans la base de donnée.</p>
+        </section>
+
+        <footer>
+            <p>Dev par Bigaston</p>
+        </footer>
+
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>    
+    </body>
+</html>

@@ -55,6 +55,20 @@ app.get("/template/:name", (req, res) => {
   res.send(mustache.render(template, renderObj))
 })
 
+app.get("/preview", (req, res) => {
+  db.all(`SELECT count(*) FROM preview WHERE status='waiting' OR status='during'`, (err, rows) => {
+    template = fs.readFileSync(path.join(__dirname, "/web/preview.mustache"), "utf8")
+
+    var render_object = {
+      "waiting_list": rows[0]["count(*)"],
+      "keeping_time": config.keeping_time
+    }
+  
+    res.setHeader("content-type", "text/html");
+    res.send(mustache.render(template, render_object))
+  })
+})
+
 app.get("/custom", (req, res) => {
   db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
     template = fs.readFileSync(path.join(__dirname, "/web/custom.mustache"), "utf8")
@@ -133,6 +147,18 @@ app.post("/addvideocustom", (req, res) => {
 
 })
 
+app.post("/addvideopreview", (req, res) => {
+  if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.audioURL != undefined && req.body.timestart != undefined) {
+    db.run(`INSERT INTO preview(email, access_token, epTitle, podTitle, imgLink, audioLink, startTime) VALUES ("${req.body.email}", "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.epTitle, req.body.podTitle, req.body.imgURL, req.body.audioURL, req.body.timestart])    
+    
+    initNewGeneration();
+    res.send("Vidéo correctement ajoutée à la liste!")
+  } else {
+    res.status(400).send("Votre requète n'est pas complète...")
+  }
+
+})
+
 // FONCTION DE GENERATIONS
 function restartGeneration() {
   console.log("Reprise de générations...")
@@ -142,6 +168,10 @@ function restartGeneration() {
     } else {
       generateImgCustom(row.id);
     }
+  })
+
+  db.each(`SELECT * FROM preview WHERE status='during'`, (err, row) => {
+      generateImgPreview(row.id);
   })
 
   initNewGeneration();
@@ -163,6 +193,22 @@ function flush() {
       }
     }
   })
+
+  db.all(`SELECT * FROM preview WHERE status='finished'`, (err, rows) => {
+    if (rows.length >=1) {
+      for (i = 0; i < rows.length; i++) {
+        time = Date.now() - rows[i].end_timestamp
+        time = time / (1000 * 60 * 60);
+    
+        if (time > config.keeping_time) {
+          fs.unlinkSync(path.join(__dirname, "/preview/", `output_${rows[i].id}.mp4`))
+          db.run(`UPDATE preview SET status='deleted' WHERE id=${rows[i].id}`);
+          console.log("Flush preview " + rows[i].id)
+    
+        }
+      }
+    }    
+  })
 }
 
 function initNewGeneration() {
@@ -179,6 +225,54 @@ function initNewGeneration() {
         }
       })
     }
+  })
+
+  db.all(`SELECT count(*) FROM preview WHERE status='during'`, (err, rows) => {
+    if (rows[0]["count(*)"] < config.max_during_preview) {
+      db.all(`SELECT * FROM preview WHERE status='waiting'`, (err, rows) => {
+        if(rows.length >= 1) {
+          db.run(`UPDATE preview SET status='during' WHERE id=${rows[0].id}`);
+          generateImgPreview(rows[0].id);
+        }
+      })
+    }
+  })
+}
+
+function generateImgPreview(id) {
+  console.log("Preview " + id + " Démarage de la création");
+
+  db.each(`SELECT * FROM preview WHERE id=${id}`, (err, row) => {
+    var template = fs.readFileSync(path.join(__dirname, "/template/preview.mustache"), "utf8");
+
+    var renderObj = {
+      "imageURL": row.imgLink,
+      "epTitle": row.epTitle,
+      "podTitle": row.podTitle
+    }
+
+    string = mustache.render(template, renderObj);
+
+    console.log("Preview " + id + " Génération de l'image");
+    
+    (async () => {
+      const browser = await puppeteer.launch({
+        defaultViewport: {
+          width: 1000,
+          height: 1000
+        },
+        headless: true,
+        args: ['--no-sandbox']
+      });
+      const page = await browser.newPage();
+      await page.setContent(string);
+      await page.screenshot({path: path.join(__dirname, "/tmp/", `preview_${id}.png`), omitBackground: true});
+    
+      await browser.close();
+      console.log("Preview " + id + " Image générée!")
+
+      //downloadAudioCustom(id, row.audioURL)
+    })();
   })
 }
 

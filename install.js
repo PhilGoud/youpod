@@ -8,6 +8,7 @@ if (!fs.existsSync(path.join(__dirname, "/config.json"))) {
     fs.writeFileSync(path.join(__dirname, "/config.json"), `{
         "port": 5674,
         "max_during": 1,
+        "max_during_preview": 1,
         "keeping_time": 12,
         "host": "http://localhost:5674",
         "mail": "a-mail@example.com",
@@ -33,6 +34,19 @@ if (!fs.existsSync(path.join(__dirname, "/base.db"))) {
         "podSub"	TEXT,
         "audioURL"	TEXT
     );`)
+
+    db.run(`CREATE TABLE "preview" (
+        "id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        "email"	TEXT NOT NULL,
+        "epTitle"	TEXT NOT NULL,
+        "podTitle"	TEXT NOT NULL,
+        "imgLink"	TEXT NOT NULL,
+        "audioLink"	TEXT NOT NULL,
+        "startTime"	TEXT,
+        "end_timestamp"	INTEGER,
+        "access_token"	TEXT,
+        "status"	TEXT DEFAULT "waiting" CHECK(status in ("waiting","during","finished","deleted","error"))
+    );`)
 }
 
 if(!fs.existsSync(path.join(__dirname, "/video"))) {
@@ -45,6 +59,10 @@ if (!fs.existsSync(path.join(__dirname, "/tmp"))) {
 
 if (!fs.existsSync(path.join(__dirname, "/loop"))) {
     fs.mkdirSync(path.join(__dirname, "/loop"))
+}
+
+if (!fs.existsSync(path.join(__dirname, "/preview"))) {
+    fs.mkdirSync(path.join(__dirname, "/preview"))
 }
 
 console.log("L'instalation est terminée. Déposez maintenant votre boucle vidéo dans /loop et appelez la loop.mp4")
