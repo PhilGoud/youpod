@@ -105,7 +105,7 @@ app.get("/download/preview/:id", (req, res) => {
           res.status(403).send("Vous n'avez pas accès à cette preview")
         } else {
           if (rows[0].status == 'finished') {
-            res.download(path.join(__dirname, "/video/", `preview_${rows[0].id}.mp4`), `youpod_preview_${rows[0].end_timestamp}.mp4`)
+            res.download(path.join(__dirname, "/preview/", `output_${rows[0].id}.mp4`), `youpod_preview_${rows[0].end_timestamp}.mp4`)
           } else if (rows[0].status == 'deleted') {
             res.status(404).send("Cette vidéo à été supprimée du site!")
           } else if (rows[0].status == 'during') {
@@ -436,7 +436,7 @@ function generateVideoPreview(id, time) {
 
   s = time.split(":")[0] * 60 + time.split(":")[1]
 
-  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", "./loop/bleu.mov", "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `./video/preview_${id}.mp4`]);
+  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", "./loop/bleu.mov", "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `./preview/output_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
     console.log("Preview " +id + ' stdout: ' + data);
