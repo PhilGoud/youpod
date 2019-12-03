@@ -253,7 +253,16 @@ app.get("/api/video/:id", (req, res) => {
       db.all(`SELECT * FROM video WHERE id='${req.params.id}'`, (err, rows) => {
         if (rows.length > 0) {
           if (req.query.token == rows[0].access_token) {
-            res.status(200).json({id: rows[0].id, status: rows[0].status, download_url: config.host + "/download/" + rows[0].id + "?token=" + rows[0].access_token});
+            returnObj = {
+              id: rows[0].id, 
+              status: rows[0].status, 
+              download_url: config.host + "/download/" + rows[0].id + "?token=" + rows[0].access_token
+            }
+
+            if (rows[0].status == "finished") {
+              returnObj.delete_timestamp = parseInt(rows[0].end_timestamp) + (config.keeping_time * 60 * 60 * 1000) 
+            }
+            res.status(200).json(returnObj);
           } else {
             res.status(401).send("Le token n'est pas juste")
           }
