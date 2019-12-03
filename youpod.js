@@ -97,6 +97,33 @@ app.get("/", (req, res) => {
   })
 })
 
+app.get("/download/preview/:id", (req, res) => {
+  if (req.query.token != undefined) {
+    db.all(`SELECT * FROM preview WHERE id='${req.params.id}'`, (err, rows) => {
+      if (rows.length >= 1) {
+        if (req.query.token != rows[0].access_token) {
+          res.status(403).send("Vous n'avez pas accès à cette preview")
+        } else {
+          if (rows[0].status == 'finished') {
+            res.download(path.join(__dirname, "/video/", `preview_${rows[0].id}.mp4`), `youpod_preview_${rows[0].end_timestamp}.mp4`)
+          } else if (rows[0].status == 'deleted') {
+            res.status(404).send("Cette vidéo à été supprimée du site!")
+          } else if (rows[0].status == 'during') {
+            res.status(404).send("Cette vidéo est encore en cours de traitement, revenez plus tard!")
+          } else {
+            res.status(404).send("Cette vidéo est encore dans la file d'attente.")
+          }
+        }
+      } else {
+        res.status(404).send("Cette vidéo n'est pas disponible...")
+      }
+    })
+  } else {
+    res.status(404).send("Vous n'avez pas mis de token d'accès à une vidéo")
+  }
+
+})
+
 app.get("/download/:id", (req, res) => {
   if (req.query.token != undefined) {
     db.all(`SELECT * FROM video WHERE id='${req.params.id}'`, (err, rows) => {
@@ -271,7 +298,7 @@ function generateImgPreview(id) {
       await browser.close();
       console.log("Preview " + id + " Image générée!")
 
-      //downloadAudioCustom(id, row.audioURL)
+      downloadAudioPreview(id, row.audioLink, row.startTime)
     })();
   })
 }
@@ -377,6 +404,15 @@ function generateFeed(feed_url, guid, temp, id) {
   })
 }
 
+function downloadAudioPreview(id, audio_url, time) {
+  console.log("Preview" + id + " Démarage du téléchargement")
+  download(audio_url).then(data => {
+    fs.writeFileSync(path.join(__dirname, `/tmp/preview_${id}.mp3`), data);
+    console.log("Preview" + id + " Fichier téléchargé!");
+    generateVideoPreview(id, time);
+  });
+}
+
 function downloadAudioCustom(id, audio_url) {
   console.log(id + " Démarage du téléchargement")
   download(audio_url).then(data => {
@@ -392,6 +428,32 @@ function downloadAudio(id, audio_url) {
     fs.writeFileSync(path.join(__dirname, `/tmp/audio_${id}.mp3`), data);
     console.log(id + " Fichier téléchargé!");
     generateVideo(id);
+  });
+}
+
+function generateVideoPreview(id, time) {
+  console.log("Preview" + id + " Démarage de la génération de la vidéo")
+
+  s = time.split(":")[0] * 60 + time.split(":")[1]
+
+  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", "./loop/bleu.mov", "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `./video/preview_${id}.mp4`]);
+
+  child.stdout.on('data', function (data) {
+    console.log("Preview " +id + ' stdout: ' + data);
+  });
+
+  child.stderr.on('data', function (data) {
+    console.log("Preview " + id + ' stderr: ' + data);
+  });
+
+  child.on('close', function (code) {
+    console.log("Preview " + id + " Vidéo générée!")
+    db.run(`UPDATE preview SET status='finished', end_timestamp='${Date.now()}' WHERE id=${id}`);
+    fs.unlinkSync(path.join(__dirname, "/tmp/", `preview_${id}.png`))
+    fs.unlinkSync(path.join(__dirname, "/tmp/", `preview_${id}.mp3`))
+
+    sendMailPreview(id);
+    initNewGeneration();
   });
 }
 
@@ -417,6 +479,32 @@ function generateVideo(id) {
     sendMail(id);
     initNewGeneration();
   });
+}
+
+function sendMailPreview(id) {
+  db.all(`SELECT * FROM preview WHERE id='${id}'`, (err, rows) => {
+
+    template = fs.readFileSync(path.join(__dirname, "/web/mail_custom.mustache"), "utf8")
+    renderObj = {
+      "ep_title": rows[0].epTitle,
+      "keeping_time": config.keeping_time,
+      "video_link": config.host + "/download/preview/" + id + "?token=" + rows[0].access_token
+    }
+
+
+    const mailOptions = {
+      from: 'youpod@balado.tools', // sender address
+      to: rows[0].email, // list of receivers
+      subject: `Vidéo générée sur Youpod!`, // Subject line
+      html: mustache.render(template, renderObj)
+    };
+    
+    transporter.sendMail(mailOptions, function (err, info) {
+      if(err) return console.log(err)
+    });
+
+    db.run(`UPDATE preview SET email='deleted' WHERE id=${id}`);
+  })
 }
 
 function sendMail(id) {
