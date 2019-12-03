@@ -408,7 +408,7 @@ function downloadAudioPreview(id, audio_url, time) {
   console.log("Preview" + id + " Démarage du téléchargement")
   download(audio_url).then(data => {
     fs.writeFileSync(path.join(__dirname, `/tmp/preview_${id}.mp3`), data);
-    console.log("Preview" + id + " Fichier téléchargé!");
+    console.log("Preview " + id + " Fichier téléchargé!");
     generateVideoPreview(id, time);
   });
 }
@@ -434,9 +434,9 @@ function downloadAudio(id, audio_url) {
 function generateVideoPreview(id, time) {
   console.log("Preview" + id + " Démarage de la génération de la vidéo")
 
-  s = time.split(":")[0] * 60 + time.split(":")[1]
+  s = parseInt(time.split(":")[0] * 60) + parseInt(time.split(":")[1])
 
-  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", "./loop/bleu.mov", "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `./preview/output_${id}.mp4`]);
+  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", "./loop/blanc.mov", "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `./preview/output_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
     console.log("Preview " +id + ' stdout: ' + data);
