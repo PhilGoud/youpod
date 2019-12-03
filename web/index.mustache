@@ -57,6 +57,10 @@
     .footer {
       font-size: 80%;
     }
+
+    .switch{
+      margin-left: 19%;
+    }
     
     </style>
     <!-- Custom styles for this template -->
@@ -68,12 +72,18 @@
       </div>
       <div class="lead">
         <p>Il y a actuellement <strong>{{ waiting_list }}</strong> vidéo(s) dans la liste d'attente. </p>
-        <p>Pour générer votre vidéo sans flux RSS, passez par <a href="/custom">ici</a></p>
 
       </div>  
       <div class="info">
         <small>Une fois la vidéo générée, vous receverez un email contenant le lien pour la télécharger. Vous aurez alors <strong>{{ keeping_time }}H</strong> pour la télécharger.</small>
       </div>
+
+        <div class="switch">
+        <p>
+          <button class="btn btn-large btn-primary" type="button">Avec un RSS</button>
+          <a href="./custom"><button class="btn btn-large" type="button">Avec un MP3</button> </a>
+        </p>
+        </div>
 
       <div class="form-label-group">
         <input type="url" name="rss" id="rss" class="form-control" placeholder="URL de votre flux" required autofocus>
