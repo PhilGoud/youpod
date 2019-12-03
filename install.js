@@ -11,8 +11,11 @@ if (!fs.existsSync(path.join(__dirname, "/config.json"))) {
         "max_during_preview": 1,
         "keeping_time": 12,
         "host": "http://localhost:5674",
-        "mail": "a-mail@example.com",
-        "password": "123456"
+        "mail": "youpod@example.com",
+        "password": "your_password",
+        "export_folder": "./video/",
+        "gen_pwd": "",
+        "api_pwd": "123456"
     }`)
 }
 
@@ -59,10 +62,6 @@ if (!fs.existsSync(path.join(__dirname, "/tmp"))) {
 
 if (!fs.existsSync(path.join(__dirname, "/loop"))) {
     fs.mkdirSync(path.join(__dirname, "/loop"))
-}
-
-if (!fs.existsSync(path.join(__dirname, "/preview"))) {
-    fs.mkdirSync(path.join(__dirname, "/preview"))
 }
 
 console.log("L'instalation est terminée. Déposez maintenant votre boucle vidéo dans /loop et appelez la loop.mp4")

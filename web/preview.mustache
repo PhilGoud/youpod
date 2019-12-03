@@ -44,6 +44,13 @@
                     <input type="email" class="form-control" id="email" name="email" placeholder="hello@example.com" required>
                 </div>
 
+                {{#need_pass}}
+                    <div class="form-group">
+                        <label for="passwd">Le mot de passe de génération</label>
+                        <input type="password" class="form-control" id="passwd" name="passwd" required>
+                    </div>
+                {{/need_pass}}
+
                 <button type="submit" class="btn btn-primary">Envoyer</button>
             </form>
             <br>
