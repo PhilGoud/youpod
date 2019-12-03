@@ -226,15 +226,47 @@ app.post("/addvideopreview", (req, res) => {
 app.post("/api/video", (req, res) => {
   if (req.query.pwd != undefined && req.query.pwd == config.api_pwd) {
     if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.podSub != undefined && req.body.audioURL != undefined) {
-      db.run(`INSERT INTO video(email, rss, template, access_token, epTitle, epImg, podTitle, podSub, audioURL) VALUES ("${req.body.email}", "__custom__", ?, "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.template, req.body.epTitle, req.body.imgURL, req.body.podTitle, req.body.podSub, req.body.audioURL])    
-      initNewGeneration();
-      res.status(200)
+      
+      db.run(`INSERT INTO video(email, rss, template, access_token, epTitle, epImg, podTitle, podSub, audioURL) VALUES ("${req.body.email}", "__custom__", ?, "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.template, req.body.epTitle, req.body.imgURL, req.body.podTitle, req.body.podSub, req.body.audioURL], function(err) {
+        if(err) {
+            console.error(err);
+            res.status(500);
+            return;
+        }
+  
+        db.each(`SELECT * FROM video WHERE id='${this.lastID}'`, (err, row) => {
+          initNewGeneration();
+          res.status(200).json({id: row.id, token: row.access_token});
+        })
+      });
     } else {
       res.status(400).send("Votre requète n'est pas complète...")
     }
   } else {
     res.status(401).send("Vous n'avez pas le bon mot de passe d'API")
   }
+})
+
+app.get("/api/video/:id", (req, res) => {
+  if (req.query.pwd != undefined && req.query.pwd == config.api_pwd) {
+    if (req.query.token != undefined) {
+      db.all(`SELECT * FROM video WHERE id='${req.params.id}'`, (err, rows) => {
+        if (rows.length > 0) {
+          if (req.query.token == rows[0].access_token) {
+            res.status(200).json({id: rows[0].id, status: rows[0].status, download_url: config.host + "/download/" + rows[0].id + "?token=" + rows[0].access_token});
+          } else {
+            res.status(401).send("Le token n'est pas juste")
+          }
+        } else {
+          res.status(404).send("Il n'y a pas de vidéo " + req.params.id)
+        }
+      })      
+    } else {
+      res.status(401).send("Vous devez préciser un token d'accès pour la vidéo")
+    }
+  } else {
+    res.status(401).send("Vous n'avez pas le bon mot de passe d'API")
+  }  
 })
 
 // FONCTION DE GENERATIONS
@@ -358,7 +390,7 @@ function generateImgCustom(id) {
   console.log(id + " Démarage de la création");
 
   db.each(`SELECT * FROM video WHERE id=${id}`, (err, row) => {
-    if (row.template != "") {
+    if (row.template != null && row.template != "") {
       template = row.template
     } else {
       var template = fs.readFileSync(path.join(__dirname, "/template/default.mustache"), "utf8");
