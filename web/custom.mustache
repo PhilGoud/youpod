@@ -1,75 +1,109 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Youpod</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link href="./static/style.css" rel="stylesheet">
-    </head>
-    <body>
-        <header>
-            <h1>Youpod</h1>
-            <p>Générez votre vidéo pour votre épisode de Podcast!</p>
-        </header>
+<!doctype html>
+<html lang="fr">
+ <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <title>YouPod</title>
 
-        <section>
-            <h2>Bienvenue sur Youpod</h2>
-            <p>Il y a actuellement <strong>{{ waiting_list }}</strong> vidéo(s) dans la liste d'attente. Une fois la vidéo générée, vous receverez un email contenant le lien pour la télécharger. Vous aurez alors <strong>{{ keeping_time }}H</strong> pour la télécharger.</p>
-            <p>Pour ajouter uniquement un flux RSS c'est <a href="/">par ici</a>.</p>
-            
-            <form action="/addvideocustom" method="POST">
-                <div class="form-group">
-                    <label for="imgURL">L'URL de votre image</label>
-                    <input type="url" class="form-control" id="imgURL" name="imgURL" placeholder="http://example.com/rss" required>
-                </div>
-                <div class="form-group">
-                    <label for="epTitle">Le titre de l'épisode</label>
-                    <input type="text" class="form-control" id="epTitle" name="epTitle" placeholder="Super Titre D'épisode" required>
-                </div>
-                <div class="form-group">
-                    <label for="podTitle">Le nom du podcast</label>
-                    <input type="text" class="form-control" id="podTitle" name="podTitle" placeholder="Super Titre de Podcast" required>
-                </div>
-                <div class="form-group">
-                    <label for="podSub">Le sous texte de votre podcast</label>
-                    <textarea class="form-control" id="podSub" name="podSub" rows="2" placeholder="Ceci est un podcast de test!" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="audioURL">Votre fichier audio</label>
-                    <input type="url" class="form-control" id="audioURL" name="audioURL" placeholder="http://example.com/audio.mp3" required>
-                </div>
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/floating-labels/">
 
-                <div class="form-group">
-                    <label for="email">Votre adresse email</label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="hello@example.com" required>
-                </div>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-                <div class="form-group">
-                    <label for="template">Votre template</label>
-                    <textarea class="form-control" id="template" name="template" rows="5"></textarea>
-                    <small id="templateHelp" class="form-text text-muted">Collez ici votre template Mustache pour créer l'image. Les balises qui seront remplacés sont <b>imageURL</b> (lien vers image de l'épisode), <b>epTitle</b> (titre de l'épisode), <b>podTitle</b> (titre du podcast) et <b>podSub</b> (le sous titre du podcast)</small>
-                </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="./static/index.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
 
-                {{#need_pass}}
-                  <div class="form-group">
-                      <label for="passwd">Le mot de passe de génération</label>
-                      <input type="password" class="form-control" id="passwd" name="passwd" required>
-                  </div>
-                {{/need_pass}}
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
 
-                <button type="submit" class="btn btn-primary">Envoyer</button>
-            </form>
-            <br>
-            <p>Cet outil utilise le tutoriel venant <a href="https://alliesnumeriques.org/tutoriels/publier-votre-podcast-sur-youtube-la-methode-classe-avec-ffmpeg/" target="_blank">d'Allier Numérique</a></p>
-            <p>Pour votre information, votre adresse email est conservée dans la base de donnée le temps de la génération, puis est automatiquement supprimée une fois le mail envoyé.<br>Votre flux RSS lui reste dans la base de donnée.</p>
-        </section>
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+      .info {
+    margin-bottom: 12px;
+    }
+    .footer {
+      font-size: 80%;
+    }
+    
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="/static/floating-labels.css" rel="stylesheet">
+  <body>
+    <form class="form-signin" action="/addvideocustom" method="POST">
+  <div class="text-center mb-4">
+    <img class="mb-4" src="/static/logo.png" alt="YouPod" width="300" height="69">
+  </div>
+  <div class="lead">
+    <p>Il y a actuellement <strong>{{ waiting_list }}</strong> vidéo(s) dans la liste d'attente. </p>
+    <p>Pour générer votre vidéo à partir du flux RSS, passez par <a href="/">ici</a></p>
+  </div>  
+  <div class="info">
+    <small>Une fois la vidéo générée, vous receverez un email contenant le lien pour la télécharger. Vous aurez alors <strong>{{ keeping_time }}H</strong> pour la télécharger.</small>
+  </div>
 
-        <footer>
-            <p>Dev par Bigaston</p>
-        </footer>
+ 
+   <div class="form-label-group">
+    <input type="text" id="imgURL" name="imgURL" class="form-control" placeholder="URL de votre flux" required autofocus>
+    <label for="imgURL">URL de votre image</label>
+  </div>
+
+   <div class="form-label-group">
+    <input type="text" id="epTitle" name="epTitle" class="form-control" placeholder="Titre de votre épisode" required autofocus>
+    <label for="epTitle">Titre de votre épisode</label>
+  </div>
+
+   <div class="form-label-group">
+    <input type="text" id="podTitle" name="podTitle" class="form-control" placeholder="Titre de votre épisode" required autofocus>
+    <label for="podTitle">Titre de votre émission</label>
+  </div>
+
+    <div class="form-label-group">
+    <input type="text" id="podSub" name="podSub" class="form-control" placeholder="Slogan de votre émission" required autofocus>
+    <label for="podSub">Slogan de votre émission</label>
+  </div>
+
+ <div class="form-label-group">
+    <input type="url" id="audioURL" name="audioURL" class="form-control" placeholder="URL de votre audio" required autofocus>
+    <label for="audioURL">URL de votre audio</label>
+  </div>
+
+   <div class="form-label-group">
+    <input type="email" id="email" name="email" class="form-control" placeholder="Votre adresse mail" required autofocus>
+    <label for="email">Votre adresse mail</label>
+  </div>
+
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="checkTemplate" onchange="changeClick()">
+        <label class="form-check-label" for="checkTemplate">Modifier le template</label>
+      </div>
+
+      <div class="form-group" id="templateDiv" style="display: none;">
+        <label for="template">Votre template</label>
+        <textarea class="form-control" id="template" name="template" rows="5"></textarea>
+        <small id="templateHelp" class="form-text text-muted">Collez ici votre template Mustache pour créer l'image. Les balises qui seront remplacés sont <b>imageURL</b> (lien vers image de l'épisode), <b>epTitle</b> (titre de l'épisode), <b>podTitle</b> (titre du podcast) et <b>podSub</b> (le sous titre du podcast)</small>
+      </div>
 
 
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>    
-    </body>
+  <button class="btn btn-lg btn-primary btn-block" type="submit">Lancer la conversion</button>
+  <div class="footer mt-5 mb-3 text-muted text-center ">
+    <p>Cet outil utilise le tutoriel venant d'Alliers Numériques</p>
+    <p>Pour votre information, votre adresse email est conservée dans la base de donnée le temps de la génération, puis est automatiquement supprimée une fois le mail envoyé. Votre flux RSS lui reste dans la base de donnée.</p></div>
+</form>
+  <script src="/static/index.js"></script>
+</body>
 </html>

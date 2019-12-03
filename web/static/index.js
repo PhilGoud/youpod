@@ -5,7 +5,7 @@ document.getElementById("rss").addEventListener("blur", fetchFeed)
 
 function fetchFeed() {
     sel = document.getElementById("selectEp")
-    sel.innerHTML = `<option selected value="last">Dernier épisode</option>`
+    sel.innerHTML = `<option selected value="last">Episode</option>`
     inp = document.getElementById("rss")
 
     fetch(cors + inp.value)
@@ -31,4 +31,13 @@ function fetchFeed() {
             sel.removeAttribute("disabled")
             sel.removeChild(sel.querySelector("option"))
         })
+}
+
+function changeClick(e) {
+    if (document.getElementById("checkTemplate").checked) {
+        document.getElementById("templateDiv").style = "";
+    } else {
+        document.getElementById("templateDiv").style = "display: none;";
+
+    }
 }

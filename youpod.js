@@ -155,6 +155,7 @@ app.get("/download/:id", (req, res) => {
 })
 
 app.post("/addvideo", (req, res) => {
+  console.log(req.body)
   if (req.body.email != undefined && req.body.rss != undefined && req.body.selectEp != undefined) {
     if (config.gen_pwd == "") {
       db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
