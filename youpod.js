@@ -267,19 +267,37 @@ app.get("/download/:id", (req, res) => {
 
 app.post("/addvideo", (req, res) => {
   if (config.gen_pwd == "") {
-    if (req.body.email != undefined && req.body.rss != undefined && req.body.selectEp != undefined) {
-      db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
-      initNewGeneration();
-      res.sendFile(path.join(__dirname, "/web/done.html"))
+    if (req.body.email != undefined && req.body.rss != undefined) {
+      if (req.body.selectEp == undefined) {
+        getLastGuid(req.body.rss, (guid)=> {
+          db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${guid}", ?, "${randtoken.generate(32)}")`, req.body.template)
+          initNewGeneration();
+          res.sendFile(path.join(__dirname, "/web/done.html"))
+        })
+      } else {
+        db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
+        initNewGeneration();
+        res.sendFile(path.join(__dirname, "/web/done.html"))
+      }
     } else {
       res.status(400).send("Votre requète n'est pas complète...")
     }
   } else {
     if (req.session.logged != undefined) {
-      if (req.body.email != undefined && req.body.rss != undefined && req.body.selectEp != undefined) {
-        db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
-        initNewGeneration();
-        res.sendFile(path.join(__dirname, "/web/done.html"))
+      if (req.body.email != undefined && req.body.rss != undefined) {
+        if (req.body.selectEp == undefined) {
+          getLastGuid(req.body.rss, (guid)=> {
+            db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${guid}", ?, "${randtoken.generate(32)}")`, req.body.template)
+            initNewGeneration();
+            res.sendFile(path.join(__dirname, "/web/done.html"))
+          })
+        } else {
+          db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
+          initNewGeneration();
+          res.sendFile(path.join(__dirname, "/web/done.html"))
+        }
+
+
       } else {
         res.status(400).send("Votre requète n'est pas complète...")
       }
@@ -288,6 +306,13 @@ app.post("/addvideo", (req, res) => {
     }
   }
 })
+
+function getLastGuid(feed_url, __callback) {
+  parser.parseURL(feed_url, (err, feed) => {
+    __callback(feed.items[0].guid)
+    
+  })
+}
 
 app.post("/addvideocustom", (req, res) => {
   if (config.gen_pwd == "") {

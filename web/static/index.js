@@ -3,10 +3,15 @@ const parser = new DOMParser();
 
 function fetchFeed() {
     sel = document.getElementById("selectEp")
-    sel.innerHTML = `<option selected value="last">Episode</option>`
+    sel.innerHTML = `<option selected value="__last__">Dernier épisode</option>`
     inp = document.getElementById("rss")
+    
+    myHeader = new Headers();
+    myHeader.append("Origin", "h.goud.so")
 
-    fetch(cors + inp.value)
+    fetch(cors + inp.value, {
+        "headers": myHeader
+    })
         .then((res) => {
             if (res.ok)
                 return res.text();
