@@ -3,7 +3,7 @@ const parser = new DOMParser();
 
 document.getElementById("rss").addEventListener("blur", fetchFeed)
 
-function fetchFeed(e) {
+function fetchFeed() {
     sel = document.getElementById("selectEp")
     sel.innerHTML = `<option selected value="last">Dernier épisode</option>`
     inp = document.getElementById("rss")
