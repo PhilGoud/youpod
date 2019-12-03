@@ -4,23 +4,30 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Jekyll v3.8.6">
     <title>YouPod</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/floating-labels/">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <!-- Favicons -->
-<link rel="apple-touch-icon" href="static/apple-touch-icon.png" sizes="180x180">
-<link rel="icon" href="static/favicon-32x32.png" sizes="32x32" type="image/png">
-<link rel="icon" href="static/favicon-16x16.png" sizes="16x16" type="image/png">
-<link rel="manifest" href="static/manifest.json">
-<link rel="mask-icon" href="static/safari-pinned-tab.svg" color="#563d7c">
-<link rel="icon" href="static/favicon.ico">
-<meta name="msapplication-config" content="static/browserconfig.xml">
-<meta name="theme-color" content="#563d7c">
+        <!--Favicon -->
+        <link rel="apple-touch-icon" sizes="57x57" href="/static/apple-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60" href="/static/apple-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="/static/apple-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76" href="/static/apple-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/static/apple-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/static/apple-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/static/apple-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/static/apple-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-icon-180x180.png">
+        <link rel="icon" type="image/png" sizes="192x192"  href="/static/android-icon-192x192.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="96x96" href="/static/favicon-96x96.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+        <link rel="manifest" href="/static/manifest.json">
+        <meta name="msapplication-TileColor" content="#ffffff">
+        <meta name="msapplication-TileImage" content="/static/ms-icon-144x144.png">
+        <meta name="theme-color" content="#ffffff">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
@@ -52,7 +59,7 @@
     <link href="./static/floating-labels.css" rel="stylesheet">
   </head>
   <body>
-    <form class="form-signin">
+    <form class="form-signin" action="/authenticate" method="POST">
   <div class="text-center mb-4">
     <img class="mb-4" src="./static/logo.png" alt="YouPod" width="300" height="69">
   </div>
@@ -60,9 +67,16 @@
     <p>Cette instance YouPod est protégée par un mot de passe</p>
   </div>  
 
+  {{#msg}}
+  <div class="alert alert-danger" role="alert">
+      {{ msg }}
+  </div>
+{{/msg}}
+
+
    <div class="form-label-group">
-    <input type="password" id="inputPassword" class="form-control" placeholder="Mot de passe" required autofocus>
-    <label for="inputEmail">Mot de passe</label>
+    <input type="password" id="password" name="password" class="form-control" placeholder="Mot de passe" required autofocus>
+    <label for="password">Mot de passe</label>
   </div>
 
   

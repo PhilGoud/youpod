@@ -1,8 +1,6 @@
 const cors = "https://cors-anywhere.herokuapp.com/"
 const parser = new DOMParser();
 
-document.getElementById("rss").addEventListener("blur", fetchFeed)
-
 function fetchFeed() {
     sel = document.getElementById("selectEp")
     sel.innerHTML = `<option selected value="last">Episode</option>`

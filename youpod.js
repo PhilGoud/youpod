@@ -11,6 +11,7 @@ const randtoken = require('rand-token');
 const sq = require('sqlite3');
 const nodemailer = require("nodemailer");
 const puppeteer = require('puppeteer');
+var session = require('express-session');
 
 var transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -25,6 +26,15 @@ app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 })); 
+
+//Configuration du cookie de session
+app.use(session({
+  secret: config.cookie_secret,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}))
+
 
 //Connexion à la base de donnée
 sq.verbose();
@@ -55,49 +65,150 @@ app.get("/template/:name", (req, res) => {
   res.send(mustache.render(template, renderObj))
 })
 
-app.get("/preview", (req, res) => {
-  db.all(`SELECT count(*) FROM preview WHERE status='waiting' OR status='during'`, (err, rows) => {
-    template = fs.readFileSync(path.join(__dirname, "/web/preview.mustache"), "utf8")
+app.get("/login", (req, res) => {
+  template = fs.readFileSync(path.join(__dirname, "/web/login.mustache"), "utf8")
 
-    var render_object = {
-      "waiting_list": rows[0]["count(*)"],
-      "keeping_time": config.keeping_time,
-      "need_pass": config.gen_pwd!=""
+  var render_object = {
+    "msg": req.session.message
+  }
+
+  res.setHeader("content-type", "text/html");
+  res.send(mustache.render(template, render_object))
+})
+
+app.post("/authenticate", (req, res) => {
+  if (req.body.password != undefined) {
+    if (req.body.password != config.gen_pwd) {
+      req.session.message = "Mot de passe incorrect";
+
+      req.session.save(function(err) {
+        if (req.query.return != undefined) {
+          res.redirect("/" + req.query.return)
+        } else {
+          res.redirect("/")
+        }
+      })
+    } else {
+      if (req.body.password == config.gen_pwd) {
+        req.session.logged = true;
+        req.session.message = undefined;
+
+        req.session.save(function(err) {
+          if (req.query.return != undefined) {
+            res.redirect("/" + req.query.return)
+          } else {
+            res.redirect("/")
+          }
+        })
+
+      }
     }
+  } else {
+    res.redirect("/login")
+  }
+})
+
+app.get("/preview", (req, res) => {
+  if (config.gen_pwd == "") {
+    db.all(`SELECT count(*) FROM preview WHERE status='waiting' OR status='during'`, (err, rows) => {
+      template = fs.readFileSync(path.join(__dirname, "/web/preview.mustache"), "utf8")
+
+      var render_object = {
+        "waiting_list": rows[0]["count(*)"],
+        "keeping_time": config.keeping_time,
+        "need_pass": config.gen_pwd!=""
+      }
+    
+      res.setHeader("content-type", "text/html");
+      res.send(mustache.render(template, render_object))
+    })
+  } else {
+    if (req.session.logged != undefined) {
+      db.all(`SELECT count(*) FROM preview WHERE status='waiting' OR status='during'`, (err, rows) => {
+        template = fs.readFileSync(path.join(__dirname, "/web/preview.mustache"), "utf8")
   
-    res.setHeader("content-type", "text/html");
-    res.send(mustache.render(template, render_object))
-  })
+        var render_object = {
+          "waiting_list": rows[0]["count(*)"],
+          "keeping_time": config.keeping_time,
+          "need_pass": config.gen_pwd!=""
+        }
+      
+        res.setHeader("content-type", "text/html");
+        res.send(mustache.render(template, render_object))
+      })
+    } else {
+      res.redirect("/login?return=preview")
+    }
+  }
 })
 
 app.get("/custom", (req, res) => {
-  db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
-    template = fs.readFileSync(path.join(__dirname, "/web/custom.mustache"), "utf8")
+  if (config.gen_pwd == "") {
+    db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
+      template = fs.readFileSync(path.join(__dirname, "/web/custom.mustache"), "utf8")
 
-    var render_object = {
-      "waiting_list": rows[0]["count(*)"],
-      "keeping_time": config.keeping_time,
-      "need_pass": config.gen_pwd!=""
-    }
+      var render_object = {
+        "waiting_list": rows[0]["count(*)"],
+        "keeping_time": config.keeping_time,
+        "need_pass": config.gen_pwd!=""
+      }
+    
+      res.setHeader("content-type", "text/html");
+      res.send(mustache.render(template, render_object))
+    })
+  } else {
+    if (req.session.logged != undefined) {
+      db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
+        template = fs.readFileSync(path.join(__dirname, "/web/custom.mustache"), "utf8")
   
-    res.setHeader("content-type", "text/html");
-    res.send(mustache.render(template, render_object))
-  })
+        var render_object = {
+          "waiting_list": rows[0]["count(*)"],
+          "keeping_time": config.keeping_time,
+          "need_pass": config.gen_pwd!=""
+        }
+      
+        res.setHeader("content-type", "text/html");
+        res.send(mustache.render(template, render_object))
+      })
+    } else {
+      res.redirect("/login?return=custom")
+    }
+  }
 })
 
 app.get("/", (req, res) => {
-  db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
-    template = fs.readFileSync(path.join(__dirname, "/web/index.mustache"), "utf8")
-
-    var render_object = {
-      "waiting_list": rows[0]["count(*)"],
-      "keeping_time": config.keeping_time,
-      "need_pass": config.gen_pwd!=""
-    }
+  if (config.gen_pwd == "") {
+    db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
+      template = fs.readFileSync(path.join(__dirname, "/web/index.mustache"), "utf8")
   
-    res.setHeader("content-type", "text/html");
-    res.send(mustache.render(template, render_object))
-  })
+      var render_object = {
+        "waiting_list": rows[0]["count(*)"],
+        "keeping_time": config.keeping_time,
+        "need_pass": config.gen_pwd!=""
+      }
+    
+      res.setHeader("content-type", "text/html");
+      res.send(mustache.render(template, render_object))
+    })
+  } else {
+    if (req.session.logged != undefined) {
+      db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
+        template = fs.readFileSync(path.join(__dirname, "/web/index.mustache"), "utf8")
+    
+        var render_object = {
+          "waiting_list": rows[0]["count(*)"],
+          "keeping_time": config.keeping_time,
+          "need_pass": config.gen_pwd!=""
+        }
+      
+        res.setHeader("content-type", "text/html");
+        res.send(mustache.render(template, render_object))
+      })
+    } else {
+      res.redirect("/login")
+    }
+  }
+
 })
 
 app.get("/download/preview/:id", (req, res) => {
@@ -155,72 +266,81 @@ app.get("/download/:id", (req, res) => {
 })
 
 app.post("/addvideo", (req, res) => {
-  console.log(req.body)
-  if (req.body.email != undefined && req.body.rss != undefined && req.body.selectEp != undefined) {
-    if (config.gen_pwd == "") {
+  if (config.gen_pwd == "") {
+    if (req.body.email != undefined && req.body.rss != undefined && req.body.selectEp != undefined) {
       db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
       initNewGeneration();
       res.sendFile(path.join(__dirname, "/web/done.html"))
     } else {
-      if (req.body.passwd != undefined && req.body.passwd == config.gen_pwd) {
+      res.status(400).send("Votre requète n'est pas complète...")
+    }
+  } else {
+    if (req.session.logged != undefined) {
+      if (req.body.email != undefined && req.body.rss != undefined && req.body.selectEp != undefined) {
         db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
         initNewGeneration();
         res.sendFile(path.join(__dirname, "/web/done.html"))
       } else {
-        res.status(401).send("Le mot de passe de génération est faux")
+        res.status(400).send("Votre requète n'est pas complète...")
       }
+    } else {
+      res.redirect("/login")
     }
-
-  } else {
-    res.status(400).send("Votre requète n'est pas complète...")
   }
-
 })
 
 app.post("/addvideocustom", (req, res) => {
-  if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.podSub != undefined && req.body.audioURL != undefined) {
-    if (config.gen_pwd == "") {
-      db.run(`INSERT INTO video(email, rss, template, access_token, epTitle, epImg, podTitle, podSub, audioURL) VALUES ("${req.body.email}", "__custom__", ?, "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.template, req.body.epTitle, req.body.imgURL, req.body.podTitle, req.body.podSub, req.body.audioURL])    
-    
-      initNewGeneration();
-      res.sendFile(path.join(__dirname, "/web/done.html"))
-    } else {
-      if (req.body.passwd != undefined && req.body.passwd == config.gen_pwd) {
+  if (config.gen_pwd == "") {
+    if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.podSub != undefined && req.body.audioURL != undefined) {
         db.run(`INSERT INTO video(email, rss, template, access_token, epTitle, epImg, podTitle, podSub, audioURL) VALUES ("${req.body.email}", "__custom__", ?, "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.template, req.body.epTitle, req.body.imgURL, req.body.podTitle, req.body.podSub, req.body.audioURL])    
-    
+      
         initNewGeneration();
-        res.sendFile(path.join(__dirname, "/web/done.html"))
-      } else {
-        res.status(401).send("Le mot de passe de génération est faux")
-      }
+        res.sendFile(path.join(__dirname, "/web/done.html"))  
+    } else {
+      res.status(400).send("Votre requète n'est pas complète...")
     }
-
   } else {
-    res.status(400).send("Votre requète n'est pas complète...")
+    if (req.session.logged != undefined) {
+      if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.podSub != undefined && req.body.audioURL != undefined) {
+        db.run(`INSERT INTO video(email, rss, template, access_token, epTitle, epImg, podTitle, podSub, audioURL) VALUES ("${req.body.email}", "__custom__", ?, "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.template, req.body.epTitle, req.body.imgURL, req.body.podTitle, req.body.podSub, req.body.audioURL])    
+      
+        initNewGeneration();
+        res.sendFile(path.join(__dirname, "/web/done.html"))  
+      } else {
+        res.status(400).send("Votre requète n'est pas complète...")
+      }
+    } else {
+      res.redirect("/login")
+    }
   }
+
 })
 
 app.post("/addvideopreview", (req, res) => {
-  if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.audioURL != undefined && req.body.timestart != undefined) {
-    if (config.gen_pwd == "") {
+  if (config.gen_pwd == "") {
+    if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.audioURL != undefined && req.body.timestart != undefined) {
       db.run(`INSERT INTO preview(email, access_token, epTitle, podTitle, imgLink, audioLink, startTime) VALUES ("${req.body.email}", "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.epTitle, req.body.podTitle, req.body.imgURL, req.body.audioURL, req.body.timestart])    
-    
+      
       initNewGeneration();
       res.sendFile(path.join(__dirname, "/web/done.html"))
     } else {
-      if (req.body.passwd != undefined && req.body.passwd == config.gen_pwd) {
+      res.status(400).send("Votre requète n'est pas complète...")
+    }
+  } else {
+    if (req.session.logged != undefined) {
+      if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.audioURL != undefined && req.body.timestart != undefined) {
         db.run(`INSERT INTO preview(email, access_token, epTitle, podTitle, imgLink, audioLink, startTime) VALUES ("${req.body.email}", "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.epTitle, req.body.podTitle, req.body.imgURL, req.body.audioURL, req.body.timestart])    
-    
+        
         initNewGeneration();
         res.sendFile(path.join(__dirname, "/web/done.html"))
       } else {
-        res.status(401).send("Le mot de passe de génération est faux")
+        res.status(400).send("Votre requète n'est pas complète...")
       }
+    } else {
+      res.redirect("/login")
     }
-
-  } else {
-    res.status(400).send("Votre requète n'est pas complète...")
   }
+
 
 })
 

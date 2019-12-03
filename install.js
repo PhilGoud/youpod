@@ -15,7 +15,8 @@ if (!fs.existsSync(path.join(__dirname, "/config.json"))) {
         "password": "your_password",
         "export_folder": "./video/",
         "gen_pwd": "",
-        "api_pwd": "123456"
+        "api_pwd": "123456",
+        "cookie_secret": "IDK"
     }`)
 }
 
