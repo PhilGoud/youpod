@@ -197,7 +197,6 @@ app.post("/addvideocustom", (req, res) => {
   } else {
     res.status(400).send("Votre requète n'est pas complète...")
   }
-
 })
 
 app.post("/addvideopreview", (req, res) => {
@@ -222,6 +221,20 @@ app.post("/addvideopreview", (req, res) => {
     res.status(400).send("Votre requète n'est pas complète...")
   }
 
+})
+
+app.post("/api/video", (req, res) => {
+  if (req.query.pwd != undefined && req.query.pwd == config.api_pwd) {
+    if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.podSub != undefined && req.body.audioURL != undefined) {
+      db.run(`INSERT INTO video(email, rss, template, access_token, epTitle, epImg, podTitle, podSub, audioURL) VALUES ("${req.body.email}", "__custom__", ?, "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.template, req.body.epTitle, req.body.imgURL, req.body.podTitle, req.body.podSub, req.body.audioURL])    
+      initNewGeneration();
+      res.status(200)
+    } else {
+      res.status(400).send("Votre requète n'est pas complète...")
+    }
+  } else {
+    res.status(401).send("Vous n'avez pas le bon mot de passe d'API")
+  }
 })
 
 // FONCTION DE GENERATIONS
