@@ -108,7 +108,7 @@ app.get("/download/preview/:id", (req, res) => {
           res.status(403).send("Vous n'avez pas accès à cette preview")
         } else {
           if (rows[0].status == 'finished') {
-            res.download(path.join(__dirname, "/video/", `preview_${rows[0].id}.mp4`), `youpod_preview_${rows[0].end_timestamp}.mp4`)
+            res.download(path.join(pathEvalute(config.export_folder), `preview_${rows[0].id}.mp4`), `youpod_preview_${rows[0].end_timestamp}.mp4`)
           } else if (rows[0].status == 'deleted') {
             res.status(404).send("Cette vidéo à été supprimée du site!")
           } else if (rows[0].status == 'during') {
@@ -135,7 +135,7 @@ app.get("/download/:id", (req, res) => {
           res.status(403).send("Vous n'avez pas accès à cette vidéo")
         } else {
           if (rows[0].status == 'finished') {
-            res.download(path.join(__dirname, "/video/", `output_${rows[0].id}.mp4`), `youpod_${rows[0].end_timestamp}.mp4`)
+            res.download(path.join(pathEvalute(config.export_folder), `output_${rows[0].id}.mp4`), `youpod_${rows[0].end_timestamp}.mp4`)
           } else if (rows[0].status == 'deleted') {
             res.status(404).send("Cette vidéo à été supprimée du site!")
           } else if (rows[0].status == 'during') {
@@ -250,7 +250,7 @@ function flush() {
         time = time / (1000 * 60 * 60);
     
         if (time > config.keeping_time) {
-          fs.unlinkSync(path.join(__dirname, "/video/", `output_${rows[i].id}.mp4`))
+          fs.unlinkSync(path.join(pathEvalute(config.export_folder), `output_${rows[i].id}.mp4`))
           db.run(`UPDATE video SET status='deleted' WHERE id=${rows[i].id}`);
           console.log("Flush video " + rows[i].id)
     
@@ -266,7 +266,7 @@ function flush() {
         time = time / (1000 * 60 * 60);
     
         if (time > config.keeping_time) {
-          fs.unlinkSync(path.join(__dirname, "/video/", `preview_${rows[i].id}.mp4`))
+          fs.unlinkSync(path.join(pathEvalute(config.export_folder), `preview_${rows[i].id}.mp4`))
           db.run(`UPDATE preview SET status='deleted' WHERE id=${rows[i].id}`);
           console.log("Flush preview " + rows[i].id)
     
@@ -474,7 +474,7 @@ function generateVideoPreview(id, time) {
 
   s = parseInt(time.split(":")[0] * 60) + parseInt(time.split(":")[1])
 
-  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", "./loop/blanc.mov", "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `./video/output_${id}.mp4`]);
+  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", "./loop/blanc.mov", "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `${config.export_folder}/output_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
     console.log("Preview " +id + ' stdout: ' + data);
@@ -498,7 +498,7 @@ function generateVideoPreview(id, time) {
 function generateVideo(id) {
   console.log(id + " Démarage de la génération de la vidéo")
 
-  var child = spawn("ffmpeg", ["-y", "-i", "./loop/loop.mp4", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "copy", `./video/output_${id}.mp4`]);
+  var child = spawn("ffmpeg", ["-y", "-i", "./loop/loop.mp4", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "copy", `${config.export_folder}/output_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
     console.log(id + ' stdout: ' + data);
@@ -593,6 +593,14 @@ function generateLoop(duration) {
     console.log(stdout)
     console.log(stderr)
   })
+}
+
+function pathEvalute(arg_path) {
+	if (path.isAbsolute(arg_path)) {
+		return arg_path
+	} else {
+		return path.join(__dirname, arg_path)
+	}
 }
 
 //Ouverture du serveur Web sur le port définit dans config.json
