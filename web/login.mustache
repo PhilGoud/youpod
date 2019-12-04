@@ -60,6 +60,8 @@
   </head>
   <body>
     <form class="form-signin" action="/authenticate" method="POST">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
   <div class="text-center mb-4">
     <img class="mb-4" src="./static/logo.png" alt="YouPod" width="300" height="69">
   </div>

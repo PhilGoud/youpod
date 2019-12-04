@@ -79,18 +79,19 @@ app.get("/template/:name", (req, res) => {
   res.send(mustache.render(template, renderObj))
 })
 
-app.get("/login", (req, res) => {
+app.get("/login", csrfProtection, (req, res) => {
   template = fs.readFileSync(path.join(__dirname, "/web/login.mustache"), "utf8")
 
   var render_object = {
-    "msg": req.session.message
+    "msg": req.session.message,
+    "csrfToken": req.csrfToken
   }
 
   res.setHeader("content-type", "text/html");
   res.send(mustache.render(template, render_object))
 })
 
-app.post("/authenticate", (req, res) => {
+app.post("/authenticate", csrfProtection, (req, res) => {
   if (req.body.password != undefined) {
     if (req.body.password != config.gen_pwd) {
       req.session.message = "Mot de passe incorrect";
