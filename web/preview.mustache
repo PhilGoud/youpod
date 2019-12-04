@@ -42,16 +42,24 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="color">Couleur de contour</label>
+                    <select id="color" name="color" class="form-control" required>
+                        <option value="noir">Noir</option>
+                        <option value="gris">Gris</option>
+                        <option value="blanc">Blanc</option>
+                        <option value="bleu">Bleu</option>
+                        <option value="vert">Vert</option>
+                        <option value="jaune">Jaune</option>
+                        <option value="orange">Orange</option>
+                        <option value="rouge">Rouge</option>
+                        <option value="violet">Violet</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="email">Votre adresse email</label>
                     <input type="email" class="form-control" id="email" name="email" placeholder="hello@example.com" required>
                 </div>
-
-                {{#need_pass}}
-                    <div class="form-group">
-                        <label for="passwd">Le mot de passe de génération</label>
-                        <input type="password" class="form-control" id="passwd" name="passwd" required>
-                    </div>
-                {{/need_pass}}
 
                 <button type="submit" class="btn btn-primary">Envoyer</button>
             </form>

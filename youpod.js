@@ -84,7 +84,8 @@ app.get("/login", csrfProtection, (req, res) => {
 
   var render_object = {
     "msg": req.session.message,
-    "csrfToken": req.csrfToken
+    "csrfToken": req.csrfToken,
+    "cb": req.query.return
   }
 
   res.setHeader("content-type", "text/html");
@@ -97,11 +98,7 @@ app.post("/authenticate", csrfProtection, (req, res) => {
       req.session.message = "Mot de passe incorrect";
 
       req.session.save(function(err) {
-        if (req.query.return != undefined) {
-          res.redirect("/" + req.query.return)
-        } else {
-          res.redirect("/")
-        }
+        res.redirect("/login?return=" + req.body.return)
       })
     } else {
       if (req.body.password == config.gen_pwd) {
@@ -109,8 +106,8 @@ app.post("/authenticate", csrfProtection, (req, res) => {
         req.session.message = undefined;
 
         req.session.save(function(err) {
-          if (req.query.return != undefined) {
-            res.redirect("/" + req.query.return)
+          if (req.body.return != "") {
+            res.redirect("/" + req.body.return)
           } else {
             res.redirect("/")
           }
@@ -362,7 +359,13 @@ app.post("/addvideocustom", csrfProtection, (req, res) => {
 app.post("/addvideopreview", csrfProtection, (req, res) => {
   if (config.gen_pwd == "") {
     if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.audioURL != undefined && req.body.timestart != undefined) {
-      db.run(`INSERT INTO preview(email, access_token, epTitle, podTitle, imgLink, audioLink, startTime) VALUES ("${req.body.email}", "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.epTitle, req.body.podTitle, req.body.imgURL, req.body.audioURL, req.body.timestart])    
+      if (req.body.color == undefined) {
+        color = "blanc"
+      } else {
+        color = req.body.color
+      }
+
+      db.run(`INSERT INTO preview(email, access_token, epTitle, podTitle, imgLink, audioLink, startTime, color) VALUES ("${req.body.email}", "${randtoken.generate(32)}", ?, ?, ?, ?, ?, ?)`, [req.body.epTitle, req.body.podTitle, req.body.imgURL, req.body.audioURL, req.body.timestart, color])    
       
       initNewGeneration();
       res.sendFile(path.join(__dirname, "/web/done.html"))
@@ -372,7 +375,13 @@ app.post("/addvideopreview", csrfProtection, (req, res) => {
   } else {
     if (req.session.logged != undefined) {
       if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.audioURL != undefined && req.body.timestart != undefined) {
-        db.run(`INSERT INTO preview(email, access_token, epTitle, podTitle, imgLink, audioLink, startTime) VALUES ("${req.body.email}", "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.epTitle, req.body.podTitle, req.body.imgURL, req.body.audioURL, req.body.timestart])    
+        if (req.body.color == undefined) {
+          color = "blanc"
+        } else {
+          color = req.body.color
+        }
+        
+        db.run(`INSERT INTO preview(email, access_token, epTitle, podTitle, imgLink, audioLink, startTime, color) VALUES ("${req.body.email}", "${randtoken.generate(32)}", ?, ?, ?, ?, ?, ?)`, [req.body.epTitle, req.body.podTitle, req.body.imgURL, req.body.audioURL, req.body.timestart, color])    
         
         initNewGeneration();
         res.sendFile(path.join(__dirname, "/web/done.html"))
@@ -554,7 +563,7 @@ function generateImgPreview(id) {
       await browser.close();
       console.log("Preview " + id + " Image générée!")
 
-      downloadAudioPreview(id, row.audioLink, row.startTime)
+      downloadAudioPreview(id, row.audioLink, row.startTime, row.color)
     })();
   })
 }
@@ -660,12 +669,12 @@ function generateFeed(feed_url, guid, temp, id) {
   })
 }
 
-function downloadAudioPreview(id, audio_url, time) {
-  console.log("Preview" + id + " Démarage du téléchargement")
+function downloadAudioPreview(id, audio_url, time, color) {
+  console.log("Preview " + id + " Démarage du téléchargement")
   download(audio_url).then(data => {
     fs.writeFileSync(path.join(__dirname, `/tmp/preview_${id}.mp3`), data);
     console.log("Preview " + id + " Fichier téléchargé!");
-    generateVideoPreview(id, time);
+    generateVideoPreview(id, time, color);
   });
 }
 
@@ -687,12 +696,12 @@ function downloadAudio(id, audio_url) {
   });
 }
 
-function generateVideoPreview(id, time) {
+function generateVideoPreview(id, time, color) {
   console.log("Preview" + id + " Démarage de la génération de la vidéo")
 
   s = parseInt(time.split(":")[0] * 60) + parseInt(time.split(":")[1])
 
-  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", "./loop/blanc.mov", "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `${config.export_folder}/output_${id}.mp4`]);
+  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", `./assets/${color}.mov`, "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `${config.export_folder}/preview_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
     console.log("Preview " +id + ' stdout: ' + data);

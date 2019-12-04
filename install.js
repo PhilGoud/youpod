@@ -46,11 +46,12 @@ if (!fs.existsSync(path.join(__dirname, "/base.db"))) {
         "podTitle"	TEXT NOT NULL,
         "imgLink"	TEXT NOT NULL,
         "audioLink"	TEXT NOT NULL,
+        "color"	TEXT CHECK(color in ('noir','gris','blanc','bleu','vert','jaune','orange','rouge','violet')),
         "startTime"	TEXT,
         "end_timestamp"	INTEGER,
         "access_token"	TEXT,
         "status"	TEXT DEFAULT "waiting" CHECK(status in ("waiting","during","finished","deleted","error"))
-    );`)
+    )`)
 }
 
 if(!fs.existsSync(path.join(__dirname, "/video"))) {
