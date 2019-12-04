@@ -701,7 +701,7 @@ function generateVideoPreview(id, time, color) {
 
   s = parseInt(time.split(":")[0] * 60) + parseInt(time.split(":")[1])
 
-  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", `./assets/${color}.mov`, "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "copy", `${config.export_folder}/preview_${id}.mp4`]);
+  var child = spawn("ffmpeg", ["-y", "-i", `./tmp/preview_${id}.png`, "-i", `./assets/${color}.mov`, "-filter_complex", 'overlay=0:0', "-ss", s, "-to", s + 20, "-i", `./tmp/preview_${id}.mp3`, "-shortest", "-acodec", "aac", `${config.export_folder}/preview_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
     console.log("Preview " +id + ' stdout: ' + data);
@@ -725,7 +725,7 @@ function generateVideoPreview(id, time, color) {
 function generateVideo(id) {
   console.log(id + " Démarage de la génération de la vidéo")
 
-  var child = spawn("ffmpeg", ["-y", "-i", "./loop/loop.mp4", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "copy", `${config.export_folder}/output_${id}.mp4`]);
+  var child = spawn("ffmpeg", ["-y", "-i", "./loop/loop.mp4", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "aac", `${config.export_folder}/output_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
     console.log(id + ' stdout: ' + data);
