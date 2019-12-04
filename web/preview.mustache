@@ -16,6 +16,8 @@
             <p>Il y a actuellement <strong>{{ waiting_list }}</strong> vidéo(s) dans la liste d'attente. Une fois la vidéo générée, vous receverez un email contenant le lien pour la télécharger. Vous aurez alors <strong>{{ keeping_time }}H</strong> pour la télécharger.</p>
             
             <form action="/addvideopreview" method="POST">
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
                 <div class="form-group">
                     <label for="imgURL">L'URL de votre image</label>
                     <input type="url" class="form-control" id="imgURL" name="imgURL" placeholder="http://example.com/rss" required>

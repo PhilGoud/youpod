@@ -67,6 +67,7 @@
     <link href="/static/floating-labels.css" rel="stylesheet">
   <body>
     <form class="form-signin" action="/addvideo" method="POST">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}">
       <div class="text-center mb-4">
         <img class="mb-4" src="/static/logo.png" alt="YouPod" width="300" height="69">
       </div>
@@ -104,7 +105,7 @@
         <label for="email">Votre adresse mail</label>
       </div>
 
-      <div class="form-check">
+      <div class="form-check" style="margin-bottom: 1rem;">
         <input type="checkbox" class="form-check-input" id="checkTemplate" onchange="changeClick()">
         <label class="form-check-label" for="checkTemplate">Modifier le template</label>
       </div>

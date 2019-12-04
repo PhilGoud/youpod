@@ -11,7 +11,8 @@ const randtoken = require('rand-token');
 const sq = require('sqlite3');
 const nodemailer = require("nodemailer");
 const puppeteer = require('puppeteer');
-var session = require('express-session');
+const session = require('express-session');
+const csurf = require('csurf')
 
 var transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -22,10 +23,13 @@ var transporter = nodemailer.createTransport({
 });
 
 var app = express()
+
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 })); 
+
+var csrfProtection = csurf()
 
 //Configuration du cookie de session
 app.use(session({
@@ -34,6 +38,16 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false }
 }))
+
+app.use(csurf())
+// error handler
+app.use(function (err, req, res, next) {
+  if (err.code !== 'EBADCSRFTOKEN') return next(err)
+
+  // handle CSRF token errors here
+  res.status(403)
+  res.send("Bad CSRF")
+})
 
 
 //Connexion à la base de donnée
@@ -108,7 +122,7 @@ app.post("/authenticate", (req, res) => {
   }
 })
 
-app.get("/preview", (req, res) => {
+app.get("/preview", csrfProtection, (req, res) => {
   if (config.gen_pwd == "") {
     db.all(`SELECT count(*) FROM preview WHERE status='waiting' OR status='during'`, (err, rows) => {
       template = fs.readFileSync(path.join(__dirname, "/web/preview.mustache"), "utf8")
@@ -116,7 +130,7 @@ app.get("/preview", (req, res) => {
       var render_object = {
         "waiting_list": rows[0]["count(*)"],
         "keeping_time": config.keeping_time,
-        "need_pass": config.gen_pwd!=""
+        "csrfToken": req.csrfToken
       }
     
       res.setHeader("content-type", "text/html");
@@ -130,7 +144,7 @@ app.get("/preview", (req, res) => {
         var render_object = {
           "waiting_list": rows[0]["count(*)"],
           "keeping_time": config.keeping_time,
-          "need_pass": config.gen_pwd!=""
+          "csrfToken": req.csrfToken
         }
       
         res.setHeader("content-type", "text/html");
@@ -142,7 +156,7 @@ app.get("/preview", (req, res) => {
   }
 })
 
-app.get("/custom", (req, res) => {
+app.get("/custom", csrfProtection, (req, res) => {
   if (config.gen_pwd == "") {
     db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
       template = fs.readFileSync(path.join(__dirname, "/web/custom.mustache"), "utf8")
@@ -150,7 +164,7 @@ app.get("/custom", (req, res) => {
       var render_object = {
         "waiting_list": rows[0]["count(*)"],
         "keeping_time": config.keeping_time,
-        "need_pass": config.gen_pwd!=""
+        "csrfToken": req.csrfToken
       }
     
       res.setHeader("content-type", "text/html");
@@ -164,7 +178,8 @@ app.get("/custom", (req, res) => {
         var render_object = {
           "waiting_list": rows[0]["count(*)"],
           "keeping_time": config.keeping_time,
-          "need_pass": config.gen_pwd!=""
+          "need_pass": config.gen_pwd!="",
+          "csrfToken": req.csrfToken
         }
       
         res.setHeader("content-type", "text/html");
@@ -176,7 +191,7 @@ app.get("/custom", (req, res) => {
   }
 })
 
-app.get("/", (req, res) => {
+app.get("/", csrfProtection, (req, res) => {
   if (config.gen_pwd == "") {
     db.all(`SELECT count(*) FROM video WHERE status='waiting' OR status='during'`, (err, rows) => {
       template = fs.readFileSync(path.join(__dirname, "/web/index.mustache"), "utf8")
@@ -184,7 +199,8 @@ app.get("/", (req, res) => {
       var render_object = {
         "waiting_list": rows[0]["count(*)"],
         "keeping_time": config.keeping_time,
-        "need_pass": config.gen_pwd!=""
+        "need_pass": config.gen_pwd!="",
+        "csrfToken": req.csrfToken
       }
     
       res.setHeader("content-type", "text/html");
@@ -198,7 +214,8 @@ app.get("/", (req, res) => {
         var render_object = {
           "waiting_list": rows[0]["count(*)"],
           "keeping_time": config.keeping_time,
-          "need_pass": config.gen_pwd!=""
+          "need_pass": config.gen_pwd!="",
+          "csrfToken": req.csrfToken
         }
       
         res.setHeader("content-type", "text/html");
@@ -265,7 +282,7 @@ app.get("/download/:id", (req, res) => {
 
 })
 
-app.post("/addvideo", (req, res) => {
+app.post("/addvideo", csrfProtection, (req, res) => {
   if (config.gen_pwd == "") {
     if (req.body.email != undefined && req.body.rss != undefined) {
       if (req.body.selectEp == undefined) {
@@ -314,7 +331,7 @@ function getLastGuid(feed_url, __callback) {
   })
 }
 
-app.post("/addvideocustom", (req, res) => {
+app.post("/addvideocustom", csrfProtection, (req, res) => {
   if (config.gen_pwd == "") {
     if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.podSub != undefined && req.body.audioURL != undefined) {
         db.run(`INSERT INTO video(email, rss, template, access_token, epTitle, epImg, podTitle, podSub, audioURL) VALUES ("${req.body.email}", "__custom__", ?, "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.template, req.body.epTitle, req.body.imgURL, req.body.podTitle, req.body.podSub, req.body.audioURL])    
@@ -341,7 +358,7 @@ app.post("/addvideocustom", (req, res) => {
 
 })
 
-app.post("/addvideopreview", (req, res) => {
+app.post("/addvideopreview", csrfProtection, (req, res) => {
   if (config.gen_pwd == "") {
     if (req.body.email != undefined && req.body.imgURL != undefined && req.body.epTitle != undefined && req.body.podTitle != undefined && req.body.audioURL != undefined && req.body.timestart != undefined) {
       db.run(`INSERT INTO preview(email, access_token, epTitle, podTitle, imgLink, audioLink, startTime) VALUES ("${req.body.email}", "${randtoken.generate(32)}", ?, ?, ?, ?, ?)`, [req.body.epTitle, req.body.podTitle, req.body.imgURL, req.body.audioURL, req.body.timestart])    
