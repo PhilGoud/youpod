@@ -832,14 +832,3 @@ function pathEvalute(arg_path) {
 
 //Ouverture du serveur Web sur le port définit dans config.json
 app.listen(config.port, () => console.log(`Serveur lancé sur le port ${config.port}`))
-
-/*
-CREATE TABLE "video" (
-	"id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	"email"	TEXT NOT NULL,
-	"rss"	TEXT NOT NULL,
-	"access_token"	TEXT NOT NULL,
-	"end_timestamp"	TEXT NOT NULL,
-	"status"	TEXT NOT NULL CHECK(status in ("waiting","finished","deleted"))
-);
-*/
