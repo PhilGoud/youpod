@@ -730,7 +730,7 @@ function generateVideoPreview(id, time, color) {
 function generateVideo(id, ep_title) {
   console.log(id + " Démarage de la génération de la vidéo")
 
-  var child = spawn("ffmpeg", ["-y", "-i", "./loop/loop.mp4", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "aac", `${config.export_folder}/output_${id}.mp4`]);
+  var child = spawn("ffmpeg", ["-y", "-f", "concat", "-i", "./assets/list.txt", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "aac", `${config.export_folder}/output_${id}.mp4`]);
 
   child.stdout.on('data', function (data) {
     console.log(id + ' stdout: ' + data);

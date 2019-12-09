@@ -38,6 +38,14 @@
     
 
     <style>
+        .activity {
+       display: flex;
+       flex-direction: row; 
+       justify-content: center;
+       align-items: center;
+       margin-bottom: 1rem;
+        }
+
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -73,9 +81,9 @@
   <div class="text-center mb-4">
     <img class="mb-4" src="/static/logo.png" alt="YouPod" width="300" height="69">
   </div>
-  <div class="lead">
-    <p>Il y a actuellement <strong>{{ waiting_list }}</strong> vidéo(s) dans la liste d'attente. </p>
-  </div>  
+    <div class="activity lead">
+      {{ waiting_list }} traitement(s) avant vous
+    </div>  
   <div class="info">
     <small>Une fois la vidéo générée, vous receverez un email contenant le lien pour la télécharger. Vous aurez alors <strong>{{ keeping_time }}H</strong> pour la télécharger.</small>
   </div>

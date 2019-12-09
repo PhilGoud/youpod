@@ -62,11 +62,5 @@ if(!fs.existsSync(path.join(__dirname, "/video"))) {
 if (!fs.existsSync(path.join(__dirname, "/tmp"))) {
     fs.mkdirSync(path.join(__dirname, "/tmp"))
 }
-
-if (!fs.existsSync(path.join(__dirname, "/loop"))) {
-    fs.mkdirSync(path.join(__dirname, "/loop"))
-}
-
-console.log("L'instalation est terminée. Déposez maintenant votre boucle vidéo dans /loop et appelez la loop.mp4")
-console.log(`Vous pouvez la récupérer dans ce dossier : https://alliesnumeriques.org/tutoriels/publier-votre-podcast-sur-youtube-la-methode-classe-avec-ffmpeg/`)
+console.log("L'instalation est terminée.")
 console.log("Pensez aussi à éditer vos informations dans config.json")

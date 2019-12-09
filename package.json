@@ -1,7 +1,7 @@
 {
   "name": "youpod",
   "version": "1.0.0",
-  "description": "",
+  "description": "Youpod, un utilitaire pour générer vos vidéos pour Youtube à partir de votre podcast",
   "main": "youpod.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
