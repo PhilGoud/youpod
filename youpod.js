@@ -307,7 +307,7 @@ app.post("/addvideo", csrfProtection, (req, res) => {
             res.sendFile(path.join(__dirname, "/web/done.html"))
           })
         } else {
-          db.run(`INSERT INTO video(email, rss, guid, template, access_token, font) VALUES ("${req.body.email}", "${req.body.rss}", "${guid}", ?, "${randtoken.generate(32)}", ?)`, req.body.template, req.body["font-choice"])
+          db.run(`INSERT INTO video(email, rss, guid, template, access_token, font) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}", ?)`, req.body.template, req.body["font-choice"])
           initNewGeneration();
           res.sendFile(path.join(__dirname, "/web/done.html"))
         }
