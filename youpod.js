@@ -605,7 +605,7 @@ function generateImgCustom(id) {
       await browser.close();
       console.log(id + " Image générée!")
 
-      downloadAudioCustom(id, row.audioURL)
+      downloadAudioCustom(id, row.audioURL, row.epTitle)
     })();
   })
 }
@@ -664,7 +664,7 @@ function generateFeed(feed_url, guid, temp, id) {
     
       await browser.close();
       console.log(id + " Image générée!")
-      downloadAudio(id, feed.items[i].enclosure.url)
+      downloadAudio(id, feed.items[i].enclosure.url, feed.items[i].title)
     })();
   })
 }
@@ -678,21 +678,21 @@ function downloadAudioPreview(id, audio_url, time, color) {
   });
 }
 
-function downloadAudioCustom(id, audio_url) {
+function downloadAudioCustom(id, audio_url, ep_title) {
   console.log(id + " Démarage du téléchargement")
   download(audio_url).then(data => {
     fs.writeFileSync(path.join(__dirname, `/tmp/audio_${id}.mp3`), data);
     console.log(id + " Fichier téléchargé!");
-    generateVideo(id);
+    generateVideo(id, ep_title);
   });
 }
 
-function downloadAudio(id, audio_url) {
+function downloadAudio(id, audio_url, ep_title) {
   console.log(id + " Démarage du téléchargement")
   download(audio_url).then(data => {
     fs.writeFileSync(path.join(__dirname, `/tmp/audio_${id}.mp3`), data);
     console.log(id + " Fichier téléchargé!");
-    generateVideo(id);
+    generateVideo(id, ep_title);
   });
 }
 
@@ -722,7 +722,7 @@ function generateVideoPreview(id, time, color) {
   });
 }
 
-function generateVideo(id) {
+function generateVideo(id, ep_title) {
   console.log(id + " Démarage de la génération de la vidéo")
 
   var child = spawn("ffmpeg", ["-y", "-i", "./loop/loop.mp4", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "aac", `${config.export_folder}/output_${id}.mp4`]);
@@ -741,7 +741,7 @@ function generateVideo(id) {
     fs.unlinkSync(path.join(__dirname, "/tmp/", `overlay_${id}.png`))
     fs.unlinkSync(path.join(__dirname, "/tmp/", `audio_${id}.mp3`))
 
-    sendMail(id);
+    sendMail(id, ep_title);
     initNewGeneration();
   });
 }
@@ -772,7 +772,7 @@ function sendMailPreview(id) {
   })
 }
 
-function sendMail(id) {
+function sendMail(id, ep_title) {
   db.all(`SELECT * FROM video WHERE id='${id}'`, (err, rows) => {
 
     if (rows[0].rss != "__custom__") {
@@ -780,6 +780,7 @@ function sendMail(id) {
       renderObj = {
         "rss_link": rows[0].rss,
         "keeping_time": config.keeping_time,
+        "epTitle": ep_title,
         "video_link": config.host + "/download/" + id + "?token=" + rows[0].access_token
       }
     } else {
