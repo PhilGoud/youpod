@@ -650,8 +650,6 @@ function generateFeed(feed_url, guid, temp, id, font) {
 
     string = mustache.render(template, renderObj);
 
-    console.log(string)
-
     console.log(id + " Génération de l'image");
     
     (async () => {
