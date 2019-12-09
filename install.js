@@ -32,12 +32,13 @@ if (!fs.existsSync(path.join(__dirname, "/base.db"))) {
         "access_token"	TEXT NOT NULL,
         "end_timestamp"	TEXT,
         "status"	TEXT NOT NULL DEFAULT 'waiting' CHECK(status in ("waiting","during","finished","deleted","error")),
+        "font"	TEXT,
         "epTitle"	TEXT,
         "epImg"	TEXT,
         "podTitle"	TEXT,
         "podSub"	TEXT,
         "audioURL"	TEXT
-    );`)
+    )`)
 
     db.run(`CREATE TABLE "preview" (
         "id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,

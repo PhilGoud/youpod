@@ -285,12 +285,12 @@ app.post("/addvideo", csrfProtection, (req, res) => {
     if (req.body.email != undefined && req.body.rss != undefined) {
       if (req.body.selectEp == undefined) {
         getLastGuid(req.body.rss, (guid)=> {
-          db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${guid}", ?, "${randtoken.generate(32)}")`, req.body.template)
+          db.run(`INSERT INTO video(email, rss, guid, template, access_token, font) VALUES ("${req.body.email}", "${req.body.rss}", "${guid}", ?, "${randtoken.generate(32)}", ?)`, req.body.template, req.body["font-choice"])
           initNewGeneration();
           res.sendFile(path.join(__dirname, "/web/done.html"))
         })
       } else {
-        db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
+        db.run(`INSERT INTO video(email, rss, guid, template, access_token, font) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}", ?)`, req.body.template, req.body["font-choice"])
         initNewGeneration();
         res.sendFile(path.join(__dirname, "/web/done.html"))
       }
@@ -302,12 +302,12 @@ app.post("/addvideo", csrfProtection, (req, res) => {
       if (req.body.email != undefined && req.body.rss != undefined) {
         if (req.body.selectEp == undefined) {
           getLastGuid(req.body.rss, (guid)=> {
-            db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${guid}", ?, "${randtoken.generate(32)}")`, req.body.template)
+            db.run(`INSERT INTO video(email, rss, guid, template, access_token, font) VALUES ("${req.body.email}", "${req.body.rss}", "${guid}", ?, "${randtoken.generate(32)}", ?)`, req.body.template, req.body["font-choice"])
             initNewGeneration();
             res.sendFile(path.join(__dirname, "/web/done.html"))
           })
         } else {
-          db.run(`INSERT INTO video(email, rss, guid, template, access_token) VALUES ("${req.body.email}", "${req.body.rss}", "${req.body.selectEp}", ?, "${randtoken.generate(32)}")`, req.body.template)
+          db.run(`INSERT INTO video(email, rss, guid, template, access_token, font) VALUES ("${req.body.email}", "${req.body.rss}", "${guid}", ?, "${randtoken.generate(32)}", ?)`, req.body.template, req.body["font-choice"])
           initNewGeneration();
           res.sendFile(path.join(__dirname, "/web/done.html"))
         }
@@ -456,7 +456,7 @@ function restartGeneration() {
   console.log("Reprise de générations...")
   db.each(`SELECT * FROM video WHERE status='during'`, (err, row) => {
     if (row.rss != "__custom__") {
-      generateFeed(row.rss, row.guid, row.template, row.id)
+      generateFeed(row.rss, row.guid, row.template, row.id, row.font)
     } else {
       generateImgCustom(row.id);
     }
@@ -510,7 +510,7 @@ function initNewGeneration() {
         if(rows.length >= 1) {
           db.run(`UPDATE video SET status='during' WHERE id=${rows[0].id}`);
           if (rows[0].rss != "__custom__") {
-            generateFeed(rows[0].rss, rows[0].guid, rows[0].template, rows[0].id)
+            generateFeed(rows[0].rss, rows[0].guid, rows[0].template, rows[0].id, rows[0].font)
           } else {
             generateImgCustom(rows[0].id);
           }
@@ -582,7 +582,8 @@ function generateImgCustom(id) {
       "imageURL": row.epImg,
       "epTitle": row.epTitle,
       "podTitle": row.podTitle,
-      "podSub": row.podSub
+      "podSub": row.podSub,
+      "font": "Montserrat"
     }
 
     string = mustache.render(template, renderObj);
@@ -610,7 +611,7 @@ function generateImgCustom(id) {
   })
 }
 
-function generateFeed(feed_url, guid, temp, id) {
+function generateFeed(feed_url, guid, temp, id, font) {
   console.log(id + " Démarage de la création")
   parser.parseURL(feed_url, (err, lFeed) => {
     console.log(id + " Récupération du flux")
@@ -642,10 +643,14 @@ function generateFeed(feed_url, guid, temp, id) {
       "imageURL": img,
       "epTitle": feed.items[i].title,
       "podTitle": feed.title,
-      "podSub": feed.itunes.subtitle
+      "podSub": feed.itunes.subtitle,
+      "font_url": font.replace(/ /g, "+"),
+      "font": font
     }
 
     string = mustache.render(template, renderObj);
+
+    console.log(string)
 
     console.log(id + " Génération de l'image");
     
