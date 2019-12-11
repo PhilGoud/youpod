@@ -1,13 +1,24 @@
-# youpod
+# YouPod
 
-Pour commencer à programmer Youpod, nous sommes partit d'un constat. Il est difficile pour un néophyte d'exporter simplement son podcast en vidéo. Il est possible d'utiliser les logiciels de montages classiques mais à la main c'est long... Sinon il existe des utilitaires en lignes, ou des hébergeurs de podcasts qui le proposent directement dans leurs offres (comme [Ausha](https://www.ausha.co/), ou [Acast Open](https://open.acast.com/)).
+Pour commencer à programmer YouPod, nous sommes partis d'un constat : 
+Il est difficile pour un néophyte d'exporter simplement son podcast en vidéo. 
 
-Mais dans le fond, c'est pas très compliqué! Il suffit de prendre l'audio, et une image non? On a quand même ajouté une petite boucle vidéo derrière pour que ça ressemble un peu plus à quelque chose. Et c'est à partir de [ce tuto d'Alliés Numériques](https://alliesnumeriques.org/tutoriels/publier-votre-podcast-sur-youtube-la-methode-classe-avec-ffmpeg/) écrit par Phil, que la première version est née...
+S'il est possible d'utiliser les logiciels de montages classiques, il faut reconnaître que le réaliser "à la main", c'est long... 
+Il existe des utilitaires en ligne, ou des hébergeurs de podcasts qui le proposent directement dans leurs offres (comme [Ausha](https://www.ausha.co/), ou [Acast Open](https://open.acast.com/)) mais tous sont payants.
+
+En réalité, ce n'est pas très compliqué : Il suffit de prendre l'audio, et une image non? 
+
+On a quand même ajouté une petite boucle vidéo derrière pour que ça ressemble un peu plus à quelque chose. 
+
+Et c'est à partir de [ce tuto d'Alliés Numériques](https://alliesnumeriques.org/tutoriels/publier-votre-podcast-sur-youtube-la-methode-classe-avec-ffmpeg/) écrit par Phil, que la première version est née...
+
 
 ## Installation
 
-Pour avoir votre propre instance de Youpod c'est simple. Il vous faudra simplement [NodeJS](https://nodejs.org/en/) (en version LTS). Une fois NodeJS installé, téléchargez le code, et installez les modules. Voici les commandes pour faire ça :
+Pour avoir votre propre instance de Youpod c'est simple : Il vous faudra simplement [NodeJS](https://nodejs.org/en/) (en version LTS). 
+Une fois NodeJS installé, téléchargez le code, et installez les modules. 
 
+Voici les commandes pour faire ça :
 ```shell
 git clone https://github.com/Bigaston/youpod
 cd youpod
@@ -42,11 +53,11 @@ Maintenant il ne vous reste plus qu'à lancer votre serveur avec
 npm start
 ```
 
-Et vous pourrez y accéder directement en ligne.
+Et vous pourrez y accéder directement via un navigateur à l'adresse que vous avez configurée (par défaut, http://localhost:5674).
 
 ## Remerciement
 
-Merci beaucoup à [Phil_Goud](https://twitter.com/Phil_Goud) qui m'a beaucoup aidé sur ce projet grâce entre autre aux vagues qu'il a généré où à toutes l'interface qu'il a fait (vu que la mienne était un peu... bof?)
+Merci beaucoup à [Phil_Goud](https://twitter.com/Phil_Goud) qui m'a beaucoup aidé sur ce projet grâce entre autre aux vagues qu'il a généré et à toute l'interface qu'il a faite (vu que la mienne était un peu... bof?)
 
 Si vous souhaitez me soutenir financièrement dans ce projet, vous pouvez passer par mon [Patreon](https://patreon.com/Bigaston) ou mon [uTip](https://utip.io/Bigaston) !
 

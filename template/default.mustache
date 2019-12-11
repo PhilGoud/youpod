@@ -1,91 +1,92 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <style>
-            @import url('https://fonts.googleapis.com/css?family={{ font_url }}');
-            body{
-                margin: 0px;
-                height: 100%;
-                width: 100%;
-                font-family: '{{ font }}', sans-serif;
-            }
 
-            .background-cover{
-                background: url({{{ imageURL }}});
-                background-size: cover;
-                background-position: center;
-                filter: blur(50px);
-                -webkit-filter: blur(50px);
-                transform: scale(1.25);
-                position: absolute; 
-                bottom: 0; right: 0px; 
-                width: 100%; height: 100%;
-                z-index:-1;
-            }
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-            img {
-                width: 655px;
-                height: 655px;
-            }
-            h1 {
-                width: 100%;
-                font-size: 64px;
-            }
-            h2 {
-                width: 100%;
-                font-size: 56px;
-            }
-            
-            p {
-                width: 100%;
-                font-size: 46px;
-            }
-            .text{
-                word-wrap: normal;
-                color: white;
-                text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.50);
-            }
-            .infos {
-                display: flex;
-                flex-direction: row; 
-                justify-content: space-around;
-                height: 800px;
-                padding-left: 20px;
-                padding-right: 20px;
+<style> 
+@import url('https://fonts.googleapis.com/css?family={{ font_url }}');
 
 
+body{
+  margin: 0px;  
+  font-family: '{{ font }}', sans-serif;
+}
 
+h1 {
+  width: 100%;
+  font-size: 3.5vw;
 
+   }
+h2 {
+  width: 100%;
+  font-size: 3vw;
+  }
+           
+ p {
+  width: 100%;
+  font-size: 2.5vw;
+  }
 
-            }
-            .cover {
-                display: flex;
-                align-items: center;
-                padding: 50px;
-            }
-            .tags {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            flex-grow: 1; 
-            }
-            
-        </style>
-    </head>
-    <body>
-        <div class="infos">
-            <div class="cover">
-             <img src="{{{ imageURL }}}" />
-            </div>
-            <div class="tags">
-                <h1 class="text">{{{ epTitle }}}</h1>
-                <div>
-                <h2 class="text">{{{ podTitle }}}</h2>
-                <p class="text">{{{ podSub }}}</p>
-                </div>
-            </div>
-        </div>
-        <div class="background-cover"></div>
-    </body>
+ img {
+  max-width: 100%;
+ 	}
+
+.wrapper {    
+  position:relative; 
+  width: 100%; 
+  min-height:100vh;
+  overflow: hidden;
+  }
+
+.infos {
+	display: flex;
+  flex-direction: row; 
+  justify-content: space-around;
+  height: 75vh;
+  padding-left: 20px;
+  padding-right: 20px;
+  z-index:1;
+  }
+           
+ .podcast-cover {
+  display: flex;
+  align-items: center;
+  padding: 50px;
+  z-index:1;
+  max-width: 40%;
+  min-width: 30%;
+  }
+
+.tags {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 1; 
+  }
+
+.text{
+  word-wrap: normal;
+  color: white;
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.50);
+	}
+
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+  <div class="infos">
+  	<div class="podcast-cover"><img src="{{{ imageURL }}}"></div>
+  	<div class="tags">
+      <h1 class="text">{{{ epTitle }}}</h1>
+      <div>
+        <h2 class="text">{{{ podTitle }}}</h2>
+      	  <p class="text">{{{ podSub }}}</p>
+      </div>
+    </div>
+  </div>	
+</div>
+
+</body>
 </html>
