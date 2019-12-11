@@ -10,6 +10,20 @@
                 width: 100%;
                 font-family: '{{ font }}', sans-serif;
             }
+
+            .background-cover{
+                background: url({{{ imageURL }}});
+                background-size: cover;
+                background-position: center;
+                filter: blur(50px);
+                -webkit-filter: blur(50px);
+                transform: scale(1.25);
+                position: absolute; 
+                bottom: 0; right: 0px; 
+                width: 100%; height: 100%;
+                z-index:-1;
+            }
+
             img {
                 width: 655px;
                 height: 655px;
@@ -72,5 +86,6 @@
                 </div>
             </div>
         </div>
+        <div class="background-cover"></div>
     </body>
 </html>

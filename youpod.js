@@ -13,6 +13,7 @@ const nodemailer = require("nodemailer");
 const puppeteer = require('puppeteer');
 const session = require('express-session');
 const csurf = require('csurf')
+const getMP3Duration = require('get-mp3-duration')
 
 var transporter = nodemailer.createTransport({
 	service: 'gmail',
@@ -728,25 +729,42 @@ function generateVideoPreview(id, time, color) {
 function generateVideo(id, ep_title) {
   console.log(id + " Démarage de la génération de la vidéo")
 
-  var child = spawn("ffmpeg", ["-y", "-f", "concat", "-i", "./assets/list.txt", "-i", `./tmp/overlay_${id}.png`, "-filter_complex", 'overlay=0:0', "-i", `./tmp/audio_${id}.mp3`, "-shortest", "-acodec", "aac", `${config.export_folder}/output_${id}.mp4`]);
+  duration = Math.trunc(getMP3Duration(fs.readFileSync(path.join(__dirname, "tmp/", `audio_${id}.mp3`)))/1000) + 1
 
-  child.stdout.on('data', function (data) {
+  var ol = spawn("ffmpeg", ["-y", "-loop", 1, "-i", `./tmp/overlay_${id}.png`, "-filter_complex", "overlay", "-vcodec", "libvpx-vp9", "-i", "./assets/loop.webm", "-t", 20, "-r", 60, "-ss", 0.1, `./tmp/loop_${id}.mp4`])
+  
+  ol.stdout.on('data', function (data) {
     console.log(id + ' stdout: ' + data);
   });
 
-  child.stderr.on('data', function (data) {
+  ol.stderr.on('data', function (data) {
     console.log(id + ' stderr: ' + data);
   });
 
-  child.on('close', function (code) {
-    console.log(id + " Vidéo générée!")
-    db.run(`UPDATE video SET status='finished', end_timestamp='${Date.now()}' WHERE id=${id}`);
-    fs.unlinkSync(path.join(__dirname, "/tmp/", `overlay_${id}.png`))
-    fs.unlinkSync(path.join(__dirname, "/tmp/", `audio_${id}.mp3`))
+  ol.on('close', function (code) {
+    var child = spawn("ffmpeg", ["-y", "-stream_loop", -1, "-i", `./tmp/loop_${id}.mp4`, "-i", `./tmp/audio_${id}.mp3`, "-c:v", "copy", "-c:a", "aac", "-shortest", "-map", "0:v", "-map", "1:a", `./${config.export_folder}/output_${id}.mp4`]);
 
-    sendMail(id, ep_title);
-    initNewGeneration();
+    child.stdout.on('data', function (data) {
+      console.log(id + ' stdout: ' + data);
+    });
+  
+    child.stderr.on('data', function (data) {
+      console.log(id + ' stderr: ' + data);
+    });
+  
+    child.on('close', function (code) {
+      console.log(id + " Vidéo générée!")
+      db.run(`UPDATE video SET status='finished', end_timestamp='${Date.now()}' WHERE id=${id}`);
+      fs.unlinkSync(path.join(__dirname, "/tmp/", `overlay_${id}.png`))
+      fs.unlinkSync(path.join(__dirname, "/tmp/", `audio_${id}.mp3`))
+      fs.unlinkSync(path.join(__dirname, "/tmp/", `loop_${id}.mp4`))
+  
+      sendMail(id, ep_title);
+      initNewGeneration();
+    });
   });
+
+
 }
 
 function sendMailPreview(id) {
