@@ -742,7 +742,7 @@ function generateVideo(id, ep_title) {
   });
 
   ol.on('close', function (code) {
-    var child = spawn("ffmpeg", ["-y", "-stream_loop", -1, "-i", `./tmp/loop_${id}.mp4`, "-i", `./tmp/audio_${id}.mp3`, "-c:v", "copy", "-c:a", "aac", "-shortest", "-map", "0:v", "-map", "1:a", `./${config.export_folder}/output_${id}.mp4`]);
+    var child = spawn("ffmpeg", ["-y", "-stream_loop", -1, "-i", `./tmp/loop_${id}.mp4`, "-i", `./tmp/audio_${id}.mp3`, "-c:v", "copy", "-c:a", "aac", "-shortest", "-map", "0:v", "-map", "1:a", `${config.export_folder}/output_${id}.mp4`]);
 
     child.stdout.on('data', function (data) {
       console.log(id + ' stdout: ' + data);
