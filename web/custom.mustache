@@ -70,6 +70,19 @@
     .switch{
       margin-left: 19%;
     }
+     .font-test{
+    background-color: white;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.1) inset;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+   }
+
+   .apply-font{
+     padding: 0.5rem;
+     margin-block-end: 0;
+   }
     
     </style>
     <!-- Custom styles for this template -->
@@ -120,6 +133,14 @@
     <input type="url" id="audioURL" name="audioURL" class="form-control" placeholder="URL de votre audio" required autofocus>
     <label for="audioURL">URL de votre audio</label>
   </div>
+  
+  <input type="hidden" name="font-choice"  id="font-choice" value="Montserrat">
+<div class="font-test">
+
+<div id="font-picker"></div>
+  <p class="apply-font">
+  Portez ce vieux whisky au juge blond qui fume sur son île intérieure, à côté de l'alcôve ovoïde, où les bûches se consument dans l'âtre, ce qui lui permet de penser à la cænogénèse de l'être dont il est question dans la cause ambiguë entendue à Moÿ, dans un capharnaüm qui, pense-t-il, diminue çà et là la qualité de son œuvre.</p>
+</div>
 
    <div class="form-label-group">
     <input type="email" id="email" name="email" class="form-control" placeholder="Votre adresse mail" required autofocus>
@@ -145,6 +166,18 @@
     <p>Youpod est un projet OpenSource développé par <a href="https://twitter.com/Bigaston">Bigaston</a>. Vous pouvez le retrouver sur <a href="https://github.com/Bigaston/youpod">Github</a> et me soutenir sur <a href="https://patreon.com/Bigaston">Patreon</a></p>
     </div>
 </form>
+<script src="./static/FontPicker.js"></script>
+
+<script>
+  var font_choice = document.getElementById("font-choice");
+  var fontPicker = new FontPicker(
+    "AIzaSyC3pZS6l_aZ4iU3c71t65dE6Cz1-THx0Fk", // Google API key
+    font_choice.value, // Default font
+    { limit: 100 }, // Additional options
+  );
+  fontPicker.setOnChange(function (font) {font_choice.value = font.family; });
+</script>
+
   <script src="/static/index.js"></script>
 </body>
 </html>
