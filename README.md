@@ -18,6 +18,10 @@ Et c'est à partir de [ce tuto d'Alliés Numériques](https://alliesnumeriques.o
 Pour avoir votre propre instance de Youpod c'est simple : Il vous faudra simplement [NodeJS](https://nodejs.org/en/) (en version LTS). 
 Une fois NodeJS installé, téléchargez le code, et installez les modules. 
 
+Il est nécéssaire aussi d'avoir FFMPEG 4.2.x minimum. Verifiez en tapant dans un terminal
+```ffmpeg -version```
+Si ce n'est pas le cas, téléchargez-le ici : https://www.ffmpeg.org/download.html
+
 Voici les commandes pour faire ça :
 ```shell
 git clone https://github.com/Bigaston/youpod
@@ -27,7 +31,7 @@ npm install
 
 (Sur Windows la commande cd ne marchera pas, rendez vous simplement dans le dossier téléchargé, cliquez sur la barre d'adresse, écrivez `cmd` et vous aurez un terminal dans le bon dossier pour lancer `npm install`)
 
-Ensuite il est très important de se rendre dans le fichier `config.json` ainsi généré, qui contiendra les informations essentielles à l'installation de votre site web.
+Ensuite il est très important de se rendre dans le fichier `/youpod/config.json` ainsi généré, qui contiendra les informations essentielles à l'installation de votre site web.
 
 ```JSON
 {
